@@ -1,0 +1,6 @@
+[submodule "sdk/MCU/STM32/STM32CubeG4"]
+	path = sdk/MCU/STM32/STM32CubeG4
+	url = https://github.com/STMicroelectronics/STM32CubeG4
+[submodule "sdk/Components/Propietary_Protocols/scomp"]
+	path = sdk/Components/Propietary_Protocols/scomp
+	url = https://git.mircod.com/internal_libraries/embedded/scomp_pure_c.git

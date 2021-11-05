@@ -1,0 +1,63 @@
+#ifndef DMA_STM32F103_H_
+#define DMA_STM32F103_H_
+
+#include "stm32f1xx_hal.h"
+
+typedef enum
+{
+  DMA_INST_1 = 0,
+  DMA_INST_2,
+
+  DMA_INST_CNT
+} dma_inst_t;
+
+typedef enum
+{
+  DMA_CHANNEL_1 = 0,
+  DMA_CHANNEL_2,
+  DMA_CHANNEL_3,
+  DMA_CHANNEL_4,
+  DMA_CHANNEL_5,
+  DMA_CHANNEL_6,
+  DMA_CHANNEL_7,
+
+  DMA_CHANNEL_CNT
+} dma_channel_t;
+
+typedef enum
+{
+  DMA_DIRECTION_M2P = DMA_MEMORY_TO_PERIPH,
+  DMA_DIRECTION_P2M = DMA_PERIPH_TO_MEMORY,
+  DMA_DIRECTION_M2M = DMA_MEMORY_TO_MEMORY
+} dma_direction_t;
+
+typedef enum
+{
+  DMA_MODE_NORMAL = DMA_NORMAL,
+  DMA_MODE_CIRCULAR = DMA_CIRCULAR
+} dma_mode_t;
+
+typedef enum
+{
+  DMA_PERIPH_INCR_ENABLE = DMA_PINC_ENABLE,
+  DMA_PERIPH_INCR_DISABLE = DMA_PINC_DISABLE
+} dma_periph_incr_t;
+
+typedef enum
+{
+  DMA_MEM_INCR_ENABLE = DMA_MINC_ENABLE,
+  DMA_MEM_INCR_DISABLE = DMA_MINC_DISABLE
+} dma_mem_incr_t;
+
+typedef enum
+{
+  DMA_XFER_CPLT_CB_ID = HAL_DMA_XFER_CPLT_CB_ID,
+  DMA_XFER_HALFCPLT_CB_ID = HAL_DMA_XFER_HALFCPLT_CB_ID,
+  DMA_XFER_ERROR_CB_ID = HAL_DMA_XFER_ERROR_CB_ID,
+  DMA_XFER_ABORT_CB_ID = HAL_DMA_XFER_ABORT_CB_ID,
+  DMA_XFER_ALL_CB_ID = HAL_DMA_XFER_ALL_CB_ID,
+
+  DMA_CB_ID_CNT = 5
+} dma_callback_id_t;
+
+#endif // ! DMA_STM32F103_H_

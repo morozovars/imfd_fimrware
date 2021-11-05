@@ -1,0 +1,43 @@
+<!DOCTYPE CrossStudio_Project_File>
+<solution Name="stm32g4xx_freertos" target="8" version="2">
+  <project Name="stm32g4xx_freertos">
+    <configuration
+      Name="Common"
+      arm_architecture="v7EM"
+      arm_core_type="Cortex-M4"
+      project_directory=""
+      project_type="Library" />
+    <folder Name="source">
+      <file file_name="../../../sdk/mcu/STM32/STM32CubeG4/Middlewares/Third_Party/FreeRTOS/Source/croutine.c" />
+      <file file_name="../../../sdk/mcu/STM32/STM32CubeG4/Middlewares/Third_Party/FreeRTOS/Source/event_groups.c" />
+      <file file_name="../../../sdk/mcu/STM32/STM32CubeG4/Middlewares/Third_Party/FreeRTOS/Source/list.c" />
+      <file file_name="../../../sdk/mcu/STM32/STM32CubeG4/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c" />
+      <file file_name="../../../sdk/mcu/STM32/STM32CubeG4/Middlewares/Third_Party/FreeRTOS/Source/queue.c" />
+      <file file_name="../../../sdk/mcu/STM32/STM32CubeG4/Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c" />
+      <file file_name="../../../sdk/mcu/STM32/STM32CubeG4/Middlewares/Third_Party/FreeRTOS/Source/tasks.c" />
+      <file file_name="../../../sdk/mcu/STM32/STM32CubeG4/Middlewares/Third_Party/FreeRTOS/Source/timers.c" />
+      <file file_name="../../../sdk/mcu/STM32/STM32CubeG4/Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c" />
+    </folder>
+    <file file_name="../../../sdk/mcu/STM32/STM32CubeG4/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.c" />
+    <file file_name="../Source/SDK_Config/FreeRTOSConfig.h" />
+  </project>
+  <configuration
+    Name="Debug"
+    c_preprocessor_definitions="DEBUG;TRACE_RTOS"
+    gcc_debugging_level="Level 3"
+    gcc_optimization_level="None" />
+  <configuration
+    Name="Release"
+    c_preprocessor_definitions="NDEBUG"
+    gcc_debugging_level="Level 2"
+    gcc_omit_frame_pointer="Yes"
+    gcc_optimization_level="Level 2 balanced" />
+  <configuration
+    Name="Common"
+    arm_architecture="v7EM"
+    arm_core_type="Cortex-M4"
+    arm_fp_abi="Hard"
+    arm_fpu_type="FPv4-SP-D16"
+    c_preprocessor_definitions=""
+    c_user_include_directories="../../../sdk/mcu/STM32/STM32CubeG4/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../../../sdk/mcu/STM32/STM32CubeG4/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F;../../../sdk/mcu/STM32/STM32CubeG4/Middlewares/Third_Party/FreeRTOS/Source/Include;../../../sdk/mcu/STM32/STM32CubeG4/Drivers/CMSIS/Core/Include;../../../sources/application/sdk_config" />
+</solution>
