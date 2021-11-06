@@ -1,4 +1,4 @@
-# Gas Mixing Station Firmware
+# Induction Motors Fault Detection Firmware
 
 ###	Repo structure
 
@@ -30,6 +30,4 @@
     + **common** - shared modules between applications
 
 #### Addition information
-[URS](https://mircod.sharepoint.com/:w:/s/MIRCODBiotech-Orgenesis/EYdAnYNHUhJHjTarmWG316kB3t_rmqj6RMSf0VjwjTKdmA?e=I2kJN)
-
-[Other project's documentation](https://mircod.sharepoint.com/:f:/s/MIRCODBiotech-Orgenesis/EhVYCbR9-blMnaPJvKKdy-4BIJE-Cd_uBi9sKOk69t3xrA?e=bUcFef)
+...
