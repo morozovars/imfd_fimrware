@@ -5,20 +5,6 @@
 uint8_t UserRxBufferFS[APP_USBD_BUF_SIZES];
 uint8_t UserTxBufferFS[APP_USBD_BUF_SIZES];
 
-USBD_CDC_LineCodingTypeDef LineCoding = {
-    115200, /* baud rate*/
-    0x00,   /* stop bits-1*/
-    0x00,   /* parity - none*/
-    0x08    /* nb. of bits 8*/
-};
-uint32_t BuffLength;
-uint32_t UserTxBufPtrIn;  /* Increment this pointer or roll it back to
-                                 start address when data are received over USART */
-uint32_t UserTxBufPtrOut; /* Increment this pointer or roll it back to
-                                 start address when data are sent over USB */
-
-__IO uint32_t uwPrescalerValue;
-
 extern USBD_HandleTypeDef hUsbDeviceFS;
 
 static int8_t CDC_Init_FS(void);
@@ -82,21 +68,11 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t * pbuf, uint16_t length)
             break;
 
         case CDC_SET_LINE_CODING:
-            LineCoding.bitrate =
-                (uint32_t)(pbuf[0] | (pbuf[1] << 8) | (pbuf[2] << 16) | (pbuf[3] << 24));
-            LineCoding.format = pbuf[4];
-            LineCoding.paritytype = pbuf[5];
-            LineCoding.datatype = pbuf[6];
+            /* Add your code here */
             break;
 
         case CDC_GET_LINE_CODING:
-            pbuf[0] = (uint8_t)(LineCoding.bitrate);
-            pbuf[1] = (uint8_t)(LineCoding.bitrate >> 8);
-            pbuf[2] = (uint8_t)(LineCoding.bitrate >> 16);
-            pbuf[3] = (uint8_t)(LineCoding.bitrate >> 24);
-            pbuf[4] = LineCoding.format;
-            pbuf[5] = LineCoding.paritytype;
-            pbuf[6] = LineCoding.datatype;
+            /* Add your code here */
             break;
 
         case CDC_SET_CONTROL_LINE_STATE:
@@ -110,6 +86,7 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t * pbuf, uint16_t length)
         default:
             break;
     }
+    (void)pbuf;
     (void)length;
     return (USBD_OK);
     /* USER CODE END 5 */
