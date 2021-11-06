@@ -80,15 +80,9 @@ void HAL_PCD_DataOutStageCallback(PCD_HandleTypeDef * hpcd, uint8_t epnum)
 static void PCD_DataInStageCallback(PCD_HandleTypeDef * hpcd, uint8_t epnum)
 #else
 void HAL_PCD_DataInStageCallback(PCD_HandleTypeDef * hpcd, uint8_t epnum)
-#endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
+#endif // USE_HAL_PCD_REGISTER_CALLBACKS.
 {
-    /* USER CODE BEGIN HAL_PCD_DataInStageCallback_PreTreatment */
-
-    /* USER CODE END HAL_PCD_DataInStageCallback_PreTreatment */
     USBD_LL_DataInStage((USBD_HandleTypeDef *)hpcd->pData, epnum, hpcd->IN_ep[epnum].xfer_buff);
-    /* USER CODE BEGIN HAL_PCD_DataInStageCallback_PostTreatment  */
-
-    /* USER CODE END HAL_PCD_DataInStageCallback_PostTreatment */
 }
 
 /**
@@ -100,15 +94,9 @@ void HAL_PCD_DataInStageCallback(PCD_HandleTypeDef * hpcd, uint8_t epnum)
 static void PCD_SOFCallback(PCD_HandleTypeDef * hpcd)
 #else
 void HAL_PCD_SOFCallback(PCD_HandleTypeDef * hpcd)
-#endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
+#endif // USE_HAL_PCD_REGISTER_CALLBACKS.
 {
-    /* USER CODE BEGIN HAL_PCD_SOFCallback_PreTreatment */
-
-    /* USER CODE END HAL_PCD_SOFCallback_PreTreatment */
     USBD_LL_SOF((USBD_HandleTypeDef *)hpcd->pData);
-    /* USER CODE BEGIN HAL_PCD_SOFCallback_PostTreatment */
-
-    /* USER CODE END HAL_PCD_SOFCallback_PostTreatment */
 }
 
 /**
@@ -120,25 +108,15 @@ void HAL_PCD_SOFCallback(PCD_HandleTypeDef * hpcd)
 static void PCD_ResetCallback(PCD_HandleTypeDef * hpcd)
 #else
 void HAL_PCD_ResetCallback(PCD_HandleTypeDef * hpcd)
-#endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
+#endif // USE_HAL_PCD_REGISTER_CALLBACKS.
 {
-    /* USER CODE BEGIN HAL_PCD_ResetCallback_PreTreatment */
-
-    /* USER CODE END HAL_PCD_ResetCallback_PreTreatment */
     USBD_SpeedTypeDef speed = USBD_SPEED_FULL;
-
     if (hpcd->Init.speed != PCD_SPEED_FULL)
     {
         return;
     }
-    /* Set Speed. */
     USBD_LL_SetSpeed((USBD_HandleTypeDef *)hpcd->pData, speed);
-
-    /* Reset Device. */
     USBD_LL_Reset((USBD_HandleTypeDef *)hpcd->pData);
-    /* USER CODE BEGIN HAL_PCD_ResetCallback_PostTreatment */
-
-    /* USER CODE END HAL_PCD_ResetCallback_PostTreatment */
 }
 
 /**
@@ -151,24 +129,13 @@ void HAL_PCD_ResetCallback(PCD_HandleTypeDef * hpcd)
 static void PCD_SuspendCallback(PCD_HandleTypeDef * hpcd)
 #else
 void HAL_PCD_SuspendCallback(PCD_HandleTypeDef * hpcd)
-#endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
+#endif // USE_HAL_PCD_REGISTER_CALLBACKS.
 {
-    /* USER CODE BEGIN HAL_PCD_SuspendCallback_PreTreatment */
-
-    /* USER CODE END HAL_PCD_SuspendCallback_PreTreatment */
-    /* Inform USB library that core enters in suspend Mode. */
     USBD_LL_Suspend((USBD_HandleTypeDef *)hpcd->pData);
-    /* Enter in STOP mode. */
-    /* USER CODE BEGIN 2 */
     if (hpcd->Init.low_power_enable)
     {
-        /* Set SLEEPDEEP bit and SleepOnExit of Cortex System Control Register. */
         SCB->SCR |= (uint32_t)((uint32_t)(SCB_SCR_SLEEPDEEP_Msk | SCB_SCR_SLEEPONEXIT_Msk));
     }
-    /* USER CODE END 2 */
-    /* USER CODE BEGIN HAL_PCD_SuspendCallback_PostTreatment */
-
-    /* USER CODE END HAL_PCD_SuspendCallback_PostTreatment */
 }
 
 /**
@@ -181,25 +148,14 @@ void HAL_PCD_SuspendCallback(PCD_HandleTypeDef * hpcd)
 static void PCD_ResumeCallback(PCD_HandleTypeDef * hpcd)
 #else
 void HAL_PCD_ResumeCallback(PCD_HandleTypeDef * hpcd)
-#endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
+#endif // USE_HAL_PCD_REGISTER_CALLBACKS.
 {
-    /* USER CODE BEGIN HAL_PCD_ResumeCallback_PreTreatment */
-
-    /* USER CODE END HAL_PCD_ResumeCallback_PreTreatment */
-
-    /* USER CODE BEGIN 3 */
     if (hpcd->Init.low_power_enable)
     {
-        /* Reset SLEEPDEEP bit of Cortex System Control Register. */
         SCB->SCR &= (uint32_t) ~((uint32_t)(SCB_SCR_SLEEPDEEP_Msk | SCB_SCR_SLEEPONEXIT_Msk));
         SystemClockConfig_Resume();
     }
-    /* USER CODE END 3 */
-
     USBD_LL_Resume((USBD_HandleTypeDef *)hpcd->pData);
-    /* USER CODE BEGIN HAL_PCD_ResumeCallback_PostTreatment */
-
-    /* USER CODE END HAL_PCD_ResumeCallback_PostTreatment */
 }
 
 /**
@@ -212,15 +168,9 @@ void HAL_PCD_ResumeCallback(PCD_HandleTypeDef * hpcd)
 static void PCD_ISOOUTIncompleteCallback(PCD_HandleTypeDef * hpcd, uint8_t epnum)
 #else
 void HAL_PCD_ISOOUTIncompleteCallback(PCD_HandleTypeDef * hpcd, uint8_t epnum)
-#endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
+#endif // USE_HAL_PCD_REGISTER_CALLBACKS.
 {
-    /* USER CODE BEGIN HAL_PCD_ISOOUTIncompleteCallback_PreTreatment */
-
-    /* USER CODE END HAL_PCD_ISOOUTIncompleteCallback_PreTreatment */
     USBD_LL_IsoOUTIncomplete((USBD_HandleTypeDef *)hpcd->pData, epnum);
-    /* USER CODE BEGIN HAL_PCD_ISOOUTIncompleteCallback_PostTreatment */
-
-    /* USER CODE END HAL_PCD_ISOOUTIncompleteCallback_PostTreatment */
 }
 
 /**
@@ -233,15 +183,9 @@ void HAL_PCD_ISOOUTIncompleteCallback(PCD_HandleTypeDef * hpcd, uint8_t epnum)
 static void PCD_ISOINIncompleteCallback(PCD_HandleTypeDef * hpcd, uint8_t epnum)
 #else
 void HAL_PCD_ISOINIncompleteCallback(PCD_HandleTypeDef * hpcd, uint8_t epnum)
-#endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
+#endif // USE_HAL_PCD_REGISTER_CALLBACKS.
 {
-    /* USER CODE BEGIN HAL_PCD_ISOINIncompleteCallback_PreTreatment */
-
-    /* USER CODE END HAL_PCD_ISOINIncompleteCallback_PreTreatment */
     USBD_LL_IsoINIncomplete((USBD_HandleTypeDef *)hpcd->pData, epnum);
-    /* USER CODE BEGIN HAL_PCD_ISOINIncompleteCallback_PostTreatment */
-
-    /* USER CODE END HAL_PCD_ISOINIncompleteCallback_PostTreatment */
 }
 
 /**
@@ -253,15 +197,9 @@ void HAL_PCD_ISOINIncompleteCallback(PCD_HandleTypeDef * hpcd, uint8_t epnum)
 static void PCD_ConnectCallback(PCD_HandleTypeDef * hpcd)
 #else
 void HAL_PCD_ConnectCallback(PCD_HandleTypeDef * hpcd)
-#endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
+#endif // USE_HAL_PCD_REGISTER_CALLBACKS.
 {
-    /* USER CODE BEGIN HAL_PCD_ConnectCallback_PreTreatment */
-
-    /* USER CODE END HAL_PCD_ConnectCallback_PreTreatment */
     USBD_LL_DevConnected((USBD_HandleTypeDef *)hpcd->pData);
-    /* USER CODE BEGIN HAL_PCD_ConnectCallback_PostTreatment */
-
-    /* USER CODE END HAL_PCD_ConnectCallback_PostTreatment */
 }
 
 /**
@@ -273,20 +211,11 @@ void HAL_PCD_ConnectCallback(PCD_HandleTypeDef * hpcd)
 static void PCD_DisconnectCallback(PCD_HandleTypeDef * hpcd)
 #else
 void HAL_PCD_DisconnectCallback(PCD_HandleTypeDef * hpcd)
-#endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
+#endif // USE_HAL_PCD_REGISTER_CALLBACKS.
 {
-    /* USER CODE BEGIN HAL_PCD_DisconnectCallback_PreTreatment */
-
-    /* USER CODE END HAL_PCD_DisconnectCallback_PreTreatment */
     USBD_LL_DevDisconnected((USBD_HandleTypeDef *)hpcd->pData);
-    /* USER CODE BEGIN HAL_PCD_DisconnectCallback_PostTreatment */
-
-    /* USER CODE END HAL_PCD_DisconnectCallback_PostTreatment */
 }
 
-/* USER CODE BEGIN LowLevelInterface */
-
-/* USER CODE END LowLevelInterface */
 
 /*******************************************************************************
                        LL Driver Interface (USB Device Library --> PCD)
@@ -299,11 +228,8 @@ void HAL_PCD_DisconnectCallback(PCD_HandleTypeDef * hpcd)
  */
 USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef * pdev)
 {
-    /* Init USB Ip. */
     hpcd_USB_FS.pData = pdev;
-    /* Link the driver to the stack. */
     pdev->pData = &hpcd_USB_FS;
-
     hpcd_USB_FS.Instance = USB;
     hpcd_USB_FS.Init.dev_endpoints = 8;
     hpcd_USB_FS.Init.speed = PCD_SPEED_FULL;
@@ -312,20 +238,15 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef * pdev)
     hpcd_USB_FS.Init.low_power_enable = DISABLE;
     hpcd_USB_FS.Init.lpm_enable = DISABLE;
     hpcd_USB_FS.Init.battery_charging_enable = DISABLE;
-
 #if (USE_HAL_PCD_REGISTER_CALLBACKS == 1U)
-    /* register Msp Callbacks (before the Init) */
     HAL_PCD_RegisterCallback(&hpcd_USB_FS, HAL_PCD_MSPINIT_CB_ID, PCD_MspInit);
     HAL_PCD_RegisterCallback(&hpcd_USB_FS, HAL_PCD_MSPDEINIT_CB_ID, PCD_MspDeInit);
-#endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
-
+#endif // USE_HAL_PCD_REGISTER_CALLBACKS.
     if (HAL_PCD_Init(&hpcd_USB_FS) != HAL_OK)
     {
         return USBD_FAIL;
     }
-
 #if (USE_HAL_PCD_REGISTER_CALLBACKS == 1U)
-    /* Register USB PCD CallBacks */
     HAL_PCD_RegisterCallback(&hpcd_USB_FS, HAL_PCD_SOF_CB_ID, PCD_SOFCallback);
     HAL_PCD_RegisterCallback(&hpcd_USB_FS, HAL_PCD_SETUPSTAGE_CB_ID, PCD_SetupStageCallback);
     HAL_PCD_RegisterCallback(&hpcd_USB_FS, HAL_PCD_RESET_CB_ID, PCD_ResetCallback);
@@ -333,26 +254,16 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef * pdev)
     HAL_PCD_RegisterCallback(&hpcd_USB_FS, HAL_PCD_RESUME_CB_ID, PCD_ResumeCallback);
     HAL_PCD_RegisterCallback(&hpcd_USB_FS, HAL_PCD_CONNECT_CB_ID, PCD_ConnectCallback);
     HAL_PCD_RegisterCallback(&hpcd_USB_FS, HAL_PCD_DISCONNECT_CB_ID, PCD_DisconnectCallback);
-    /* USER CODE BEGIN RegisterCallBackFirstPart */
-
-    /* USER CODE END RegisterCallBackFirstPart */
     HAL_PCD_RegisterDataOutStageCallback(&hpcd_USB_FS, PCD_DataOutStageCallback);
     HAL_PCD_RegisterDataInStageCallback(&hpcd_USB_FS, PCD_DataInStageCallback);
     HAL_PCD_RegisterIsoOutIncpltCallback(&hpcd_USB_FS, PCD_ISOOUTIncompleteCallback);
     HAL_PCD_RegisterIsoInIncpltCallback(&hpcd_USB_FS, PCD_ISOINIncompleteCallback);
-    /* USER CODE BEGIN RegisterCallBackSecondPart */
-
-    /* USER CODE END RegisterCallBackSecondPart */
 #endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
-    /* USER CODE BEGIN EndPoint_Configuration */
     HAL_PCDEx_PMAConfig(&hpcd_USB_FS, 0x00, PCD_SNG_BUF, 0x14);
     HAL_PCDEx_PMAConfig(&hpcd_USB_FS, 0x80, PCD_SNG_BUF, 0x54);
-    /* USER CODE END EndPoint_Configuration */
-    /* USER CODE BEGIN EndPoint_Configuration_CDC */
     HAL_PCDEx_PMAConfig(&hpcd_USB_FS, CDC_IN_EP, PCD_SNG_BUF, 0x94);
     HAL_PCDEx_PMAConfig(&hpcd_USB_FS, CDC_OUT_EP, PCD_SNG_BUF, 0xD4);
     HAL_PCDEx_PMAConfig(&hpcd_USB_FS, CDC_CMD_EP, PCD_SNG_BUF, 0x114);
-    /* USER CODE END EndPoint_Configuration_CDC */
     return USBD_OK;
 }
 
@@ -365,11 +276,8 @@ USBD_StatusTypeDef USBD_LL_DeInit(USBD_HandleTypeDef * pdev)
 {
     HAL_StatusTypeDef hal_status = HAL_OK;
     USBD_StatusTypeDef usb_status = USBD_OK;
-
     hal_status = HAL_PCD_DeInit(pdev->pData);
-
     usb_status = USBD_Get_USB_Status(hal_status);
-
     return usb_status;
 }
 
@@ -382,11 +290,8 @@ USBD_StatusTypeDef USBD_LL_Start(USBD_HandleTypeDef * pdev)
 {
     HAL_StatusTypeDef hal_status = HAL_OK;
     USBD_StatusTypeDef usb_status = USBD_OK;
-
     hal_status = HAL_PCD_Start(pdev->pData);
-
     usb_status = USBD_Get_USB_Status(hal_status);
-
     return usb_status;
 }
 
@@ -399,11 +304,8 @@ USBD_StatusTypeDef USBD_LL_Stop(USBD_HandleTypeDef * pdev)
 {
     HAL_StatusTypeDef hal_status = HAL_OK;
     USBD_StatusTypeDef usb_status = USBD_OK;
-
     hal_status = HAL_PCD_Stop(pdev->pData);
-
     usb_status = USBD_Get_USB_Status(hal_status);
-
     return usb_status;
 }
 
@@ -420,11 +322,8 @@ USBD_StatusTypeDef USBD_LL_OpenEP(
 {
     HAL_StatusTypeDef hal_status = HAL_OK;
     USBD_StatusTypeDef usb_status = USBD_OK;
-
     hal_status = HAL_PCD_EP_Open(pdev->pData, ep_addr, ep_mps, ep_type);
-
     usb_status = USBD_Get_USB_Status(hal_status);
-
     return usb_status;
 }
 
@@ -438,11 +337,8 @@ USBD_StatusTypeDef USBD_LL_CloseEP(USBD_HandleTypeDef * pdev, uint8_t ep_addr)
 {
     HAL_StatusTypeDef hal_status = HAL_OK;
     USBD_StatusTypeDef usb_status = USBD_OK;
-
     hal_status = HAL_PCD_EP_Close(pdev->pData, ep_addr);
-
     usb_status = USBD_Get_USB_Status(hal_status);
-
     return usb_status;
 }
 
@@ -456,11 +352,8 @@ USBD_StatusTypeDef USBD_LL_FlushEP(USBD_HandleTypeDef * pdev, uint8_t ep_addr)
 {
     HAL_StatusTypeDef hal_status = HAL_OK;
     USBD_StatusTypeDef usb_status = USBD_OK;
-
     hal_status = HAL_PCD_EP_Flush(pdev->pData, ep_addr);
-
     usb_status = USBD_Get_USB_Status(hal_status);
-
     return usb_status;
 }
 
@@ -474,11 +367,8 @@ USBD_StatusTypeDef USBD_LL_StallEP(USBD_HandleTypeDef * pdev, uint8_t ep_addr)
 {
     HAL_StatusTypeDef hal_status = HAL_OK;
     USBD_StatusTypeDef usb_status = USBD_OK;
-
     hal_status = HAL_PCD_EP_SetStall(pdev->pData, ep_addr);
-
     usb_status = USBD_Get_USB_Status(hal_status);
-
     return usb_status;
 }
 
@@ -492,11 +382,8 @@ USBD_StatusTypeDef USBD_LL_ClearStallEP(USBD_HandleTypeDef * pdev, uint8_t ep_ad
 {
     HAL_StatusTypeDef hal_status = HAL_OK;
     USBD_StatusTypeDef usb_status = USBD_OK;
-
     hal_status = HAL_PCD_EP_ClrStall(pdev->pData, ep_addr);
-
     usb_status = USBD_Get_USB_Status(hal_status);
-
     return usb_status;
 }
 
@@ -509,7 +396,6 @@ USBD_StatusTypeDef USBD_LL_ClearStallEP(USBD_HandleTypeDef * pdev, uint8_t ep_ad
 uint8_t USBD_LL_IsStallEP(USBD_HandleTypeDef * pdev, uint8_t ep_addr)
 {
     PCD_HandleTypeDef * hpcd = (PCD_HandleTypeDef *)pdev->pData;
-
     if ((ep_addr & 0x80) == 0x80)
     {
         return hpcd->IN_ep[ep_addr & 0x7F].is_stall;
@@ -530,11 +416,8 @@ USBD_StatusTypeDef USBD_LL_SetUSBAddress(USBD_HandleTypeDef * pdev, uint8_t dev_
 {
     HAL_StatusTypeDef hal_status = HAL_OK;
     USBD_StatusTypeDef usb_status = USBD_OK;
-
     hal_status = HAL_PCD_SetAddress(pdev->pData, dev_addr);
-
     usb_status = USBD_Get_USB_Status(hal_status);
-
     return usb_status;
 }
 
@@ -551,11 +434,8 @@ USBD_StatusTypeDef USBD_LL_Transmit(
 {
     HAL_StatusTypeDef hal_status = HAL_OK;
     USBD_StatusTypeDef usb_status = USBD_OK;
-
     hal_status = HAL_PCD_EP_Transmit(pdev->pData, ep_addr, pbuf, size);
-
     usb_status = USBD_Get_USB_Status(hal_status);
-
     return usb_status;
 }
 
@@ -572,11 +452,8 @@ USBD_StatusTypeDef USBD_LL_PrepareReceive(
 {
     HAL_StatusTypeDef hal_status = HAL_OK;
     USBD_StatusTypeDef usb_status = USBD_OK;
-
     hal_status = HAL_PCD_EP_Receive(pdev->pData, ep_addr, pbuf, size);
-
     usb_status = USBD_Get_USB_Status(hal_status);
-
     return usb_status;
 }
 
@@ -677,4 +554,3 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
     }
     return usb_status;
 }
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
