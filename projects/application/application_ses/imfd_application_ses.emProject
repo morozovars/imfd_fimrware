@@ -72,7 +72,6 @@
         <file file_name="../../../sources/application/trace/app_trace.c" />
         <file file_name="../../../sources/application/trace/err_handler.c" />
         <file file_name="../../../sources/application/trace/dbgout.h" />
-        <file file_name="../../../sources/application/thread_rtos_trace.c" />
       </folder>
       <file file_name="../../../sources/application/app_os.c" />
       <folder Name="cpu">
@@ -85,7 +84,7 @@
       <file file_name="../../../sources/application/app_config.h" />
       <file file_name="../../../sources/application/board_config.h" />
       <file file_name="../../../sources/application/thread_communication.c" />
-      <file file_name="../../../sources/application/thread_communication.h" />
+      <file file_name="../../../sources/application/thread_rtos_trace.c" />
     </folder>
     <folder Name="sdk_config">
       <file file_name="../../../sources/application/sdk_config/FreeRTOSConfig.h" />

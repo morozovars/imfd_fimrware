@@ -1,90 +1,29 @@
-/* USER CODE BEGIN Header */
-/**
-******************************************************************************
-* @file           USB_Device/CDC_Standalone/USB_Device/Target/usbd_conf.c
-* @author         MCD Application Team
-* @brief          This file implements the board support package for the USB device library
-******************************************************************************
-* @attention
-*
-* <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
-* All rights reserved.</center></h2>
-*
-* This software component is licensed by ST under Ultimate Liberty license
-* SLA0044, the "License"; You may not use this file except in compliance with
-* the License. You may obtain a copy of the License at:
-*                             www.st.com/SLA0044
-*
-******************************************************************************
-*/
-/* USER CODE END Header */
-
-/* Includes ------------------------------------------------------------------*/
 #include "stm32g4xx.h"
 #include "stm32g4xx_hal.h"
 #include "usbd_core.h"
 #include "usbd_def.h"
-
 #include "usbd_cdc.h"
 
-/* USER CODE BEGIN Includes */
-
-/* USER CODE END Includes */
-
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-
-/* Private variables ---------------------------------------------------------*/
-/* USER CODE BEGIN PV */
-/* Private variables ---------------------------------------------------------*/
-
-/* USER CODE END PV */
 
 PCD_HandleTypeDef hpcd_USB_FS;
 
-/* USER CODE BEGIN 0 */
 
-/* USER CODE END 0 */
-
-/* Exported function prototypes ----------------------------------------------*/
-
-/* USER CODE BEGIN PFP */
-/* Private function prototypes -----------------------------------------------*/
-
-/* USER CODE END PFP */
-
-/* Private functions ---------------------------------------------------------*/
 static USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status);
-/* USER CODE BEGIN 1 */
 static void SystemClockConfig_Resume(void);
 void (* p_system_clock_config_resume)(void) = NULL;
 
-/*******************************************************************************
-                       LL Driver Callbacks (PCD -> USB Device Library)
-*******************************************************************************/
-/* MSP Init */
 
 #if (USE_HAL_PCD_REGISTER_CALLBACKS == 1U)
 static void PCD_MspInit(PCD_HandleTypeDef * pcdHandle)
 #else
 void HAL_PCD_MspInit(PCD_HandleTypeDef * pcdHandle)
-#endif /* USE_HAL_PCD_REGISTER_CALLBACK */
+#endif // USE_HAL_PCD_REGISTER_CALLBACKS
 {
     if (pcdHandle->Instance == USB)
     {
-        /* USER CODE BEGIN USB_MspInit 0 */
-
-        /* USER CODE END USB_MspInit 0 */
-        /* Peripheral clock enable */
         __HAL_RCC_USB_CLK_ENABLE();
-
-        /* Peripheral interrupt init */
         HAL_NVIC_SetPriority(USB_LP_IRQn, 4, 0);
         HAL_NVIC_EnableIRQ(USB_LP_IRQn);
-        /* USER CODE BEGIN USB_MspInit 1 */
-
-        /* USER CODE END USB_MspInit 1 */
     }
 }
 
@@ -92,22 +31,13 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef * pcdHandle)
 static void PCD_MspDeInit(PCD_HandleTypeDef * pcdHandle)
 #else
 void HAL_PCD_MspDeInit(PCD_HandleTypeDef * pcdHandle)
-#endif /* USE_HAL_PCD_REGISTER_CALLBACK */
+#endif // USE_HAL_PCD_REGISTER_CALLBACKS.
 {
     if (pcdHandle->Instance == USB)
     {
-        /* USER CODE BEGIN USB_MspDeInit 0 */
-
-        /* USER CODE END USB_MspDeInit 0 */
-        /* Peripheral clock disable */
         __HAL_RCC_USB_CLK_DISABLE();
-
-        /* Peripheral interrupt Deinit*/
         HAL_NVIC_DisableIRQ(USB_LP_IRQn);
-
-        /* USER CODE BEGIN USB_MspDeInit 1 */
         __HAL_RCC_GPIOA_CLK_DISABLE();
-        /* USER CODE END USB_MspDeInit 1 */
     }
 }
 
@@ -120,15 +50,9 @@ void HAL_PCD_MspDeInit(PCD_HandleTypeDef * pcdHandle)
 static void PCD_SetupStageCallback(PCD_HandleTypeDef * hpcd)
 #else
 void HAL_PCD_SetupStageCallback(PCD_HandleTypeDef * hpcd)
-#endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
+#endif // USE_HAL_PCD_REGISTER_CALLBACKS.
 {
-    /* USER CODE BEGIN HAL_PCD_SetupStageCallback_PreTreatment */
-
-    /* USER CODE END  HAL_PCD_SetupStageCallback_PreTreatment */
     USBD_LL_SetupStage((USBD_HandleTypeDef *)hpcd->pData, (uint8_t *)hpcd->Setup);
-    /* USER CODE BEGIN HAL_PCD_SetupStageCallback_PostTreatment */
-
-    /* USER CODE END  HAL_PCD_SetupStageCallback_PostTreatment */
 }
 
 /**
@@ -141,15 +65,9 @@ void HAL_PCD_SetupStageCallback(PCD_HandleTypeDef * hpcd)
 static void PCD_DataOutStageCallback(PCD_HandleTypeDef * hpcd, uint8_t epnum)
 #else
 void HAL_PCD_DataOutStageCallback(PCD_HandleTypeDef * hpcd, uint8_t epnum)
-#endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
+#endif // USE_HAL_PCD_REGISTER_CALLBACKS.
 {
-    /* USER CODE BEGIN HAL_PCD_DataOutStageCallback_PreTreatment */
-
-    /* USER CODE END HAL_PCD_DataOutStageCallback_PreTreatment */
     USBD_LL_DataOutStage((USBD_HandleTypeDef *)hpcd->pData, epnum, hpcd->OUT_ep[epnum].xfer_buff);
-    /* USER CODE BEGIN HAL_PCD_DataOutStageCallback_PostTreatment */
-
-    /* USER CODE END HAL_PCD_DataOutStageCallback_PostTreatment */
 }
 
 /**

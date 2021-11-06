@@ -2,9 +2,8 @@
 #include "app_config.h"
 #include "trace/dbgout.h"
 
-
-uint8_t UserRxBufferFS[USBD_BUF_SIZES];
-uint8_t UserTxBufferFS[USBD_BUF_SIZES];
+uint8_t UserRxBufferFS[APP_USBD_BUF_SIZES];
+uint8_t UserTxBufferFS[APP_USBD_BUF_SIZES];
 
 USBD_CDC_LineCodingTypeDef LineCoding = {
     115200, /* baud rate*/
@@ -20,16 +19,13 @@ uint32_t UserTxBufPtrOut; /* Increment this pointer or roll it back to
 
 __IO uint32_t uwPrescalerValue;
 
-
 extern USBD_HandleTypeDef hUsbDeviceFS;
-
 
 static int8_t CDC_Init_FS(void);
 static int8_t CDC_DeInit_FS(void);
 static int8_t CDC_Control_FS(uint8_t cmd, uint8_t * pbuf, uint16_t length);
 static int8_t CDC_Receive_FS(uint8_t * pbuf, uint32_t * Len);
 static int8_t CDC_TransmitCplt_FS(uint8_t * pbuf, uint32_t * Len, uint8_t epnum);
-
 
 USBD_CDC_ItfTypeDef USBD_Interface_fops_FS = {
     CDC_Init_FS, CDC_DeInit_FS, CDC_Control_FS, CDC_Receive_FS, CDC_TransmitCplt_FS};
@@ -136,9 +132,11 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t * pbuf, uint16_t length)
  */
 static int8_t CDC_Receive_FS(uint8_t * Buf, uint32_t * Len)
 {
-    //char buf[200] = {0};
-    //memcpy(buf, Buf, (size_t)*Len);
-    //dbg_printf("%s\n", buf);
+    USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
+    USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+    char buf[200] = {0};
+    memcpy(buf, Buf, (size_t)*Len);
+    dbg_printf("%s\n", buf);
     //(void)Buf;
     //(void)Len;
     return (USBD_OK);

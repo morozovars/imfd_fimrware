@@ -15,7 +15,6 @@
 
 USBD_HandleTypeDef hUsbDeviceFS;
 extern USBD_DescriptorsTypeDef CDC_Desc;
-extern PCD_HandleTypeDef hpcd_USB_FS;
 
 
 static inline bool is_err(ret_code_t code)

@@ -82,7 +82,7 @@ static void rtos_trace_thread(void * argument)
     while (1)
     {
 
-        tick += THREAD_RTOS_TRACE_PERIOD_MS;
+        tick += APP_THREAD_RTOS_TRACE_PERIOD_MS;
         osDelayUntil(tick);
 
         thread_rtos_trace_run(thread_ids);
