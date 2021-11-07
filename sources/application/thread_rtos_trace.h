@@ -5,6 +5,7 @@
 #include "cmsis_os.h"
 
 
+void thread_rtos_trace_init(void);
 void thread_rtos_trace_run(osThreadId_t * p_thread_ids);
 
 

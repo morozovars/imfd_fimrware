@@ -17,6 +17,7 @@ enum
 
 enum 
 {
+    QUEUE_USB_RX,
     QUEUES_COUNT,
 };
 

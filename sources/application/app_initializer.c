@@ -7,15 +7,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include "usbd_cdc.h"
-#include "usbd_cdc_if.h"
-#include "usbd_core.h"
-#include "usbd_desc.h"
-
-
-USBD_HandleTypeDef hUsbDeviceFS;
-extern USBD_DescriptorsTypeDef CDC_Desc;
-
 
 static inline bool is_err(ret_code_t code)
 {
@@ -78,43 +69,12 @@ ret_code_t app_cpu_clock_config(void)
     return CODE_SUCCESS;
 }
 
-
-static void USBD_clock_resume(void)
-{
-    app_cpu_clock_config();
-}
-
-
-ret_code_t usbd_init(void)
-{
-    USBD_register_clock_config_func(USBD_clock_resume);
-
-    if (USBD_Init(&hUsbDeviceFS, &CDC_Desc, DEVICE_FS) != USBD_OK)
-    {
-        return CODE_RESOURCES;
-    }
-    if (USBD_RegisterClass(&hUsbDeviceFS, &USBD_CDC) != USBD_OK)
-    {
-        return CODE_RESOURCES;
-    }
-    if (USBD_CDC_RegisterInterface(&hUsbDeviceFS, &USBD_Interface_fops_FS) != USBD_OK)
-    {
-        return CODE_RESOURCES;
-    }
-    if (USBD_Start(&hUsbDeviceFS) != USBD_OK)
-    {
-        return CODE_RESOURCES;
-    }
-
-    return CODE_SUCCESS;
-}
-
 // Init shared and single use periphery
 static ret_code_t cpu_init(void)
 {
     ret_code_t err_code;
-    err_code = usbd_init();
-    if (err_code != CODE_SUCCESS)
+    err_code = app_cpu_clock_config();
+    if (is_err(err_code))
     {
         return err_code;
     }
@@ -125,15 +85,16 @@ static ret_code_t cpu_init(void)
 ret_code_t app_init(void)
 {
     ret_code_t err_code;
-
-    HAL_Init();
-    app_cpu_clock_config();
+    err_code = hal2code(HAL_Init());
+    if (is_err(err_code))
+    {
+        return err_code;
+    }
     err_code = cpu_init();
     if (is_err(err_code))
     {
         return err_code;
     }
-    app_trace_init();
     dbg_printf("<App Init> Initialization successfull\n");
     return CODE_SUCCESS;
 }

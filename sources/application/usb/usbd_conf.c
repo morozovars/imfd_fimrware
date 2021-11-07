@@ -3,6 +3,7 @@
 #include "usbd_core.h"
 #include "usbd_def.h"
 #include "usbd_cdc.h"
+#include "app_config.h"
 
 
 PCD_HandleTypeDef hpcd_USB_FS;
@@ -22,7 +23,7 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef * pcdHandle)
     if (pcdHandle->Instance == USB)
     {
         __HAL_RCC_USB_CLK_ENABLE();
-        HAL_NVIC_SetPriority(USB_LP_IRQn, 4, 0);
+        HAL_NVIC_SetPriority(USB_LP_IRQn, APP_USBD_IRQ_PRIO, 0);
         HAL_NVIC_EnableIRQ(USB_LP_IRQn);
     }
 }

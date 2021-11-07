@@ -3,6 +3,7 @@
 #include "app_initializer.h"
 #include "board_config.h"
 #include "thread_blinky.h"
+#include "thread_dsp.h"
 #include "thread_communication.h"
 #include "thread_rtos_trace.h"
 #include "trace/dbgout.h"
@@ -10,7 +11,8 @@
 
 
 static osThreadId_t thread_ids[THREADS_CNT];
-//static osMessageQueueId_t queues_ids[QUEUES_COUNT];
+static osMessageQueueId_t queues_ids[QUEUES_COUNT];
+static uint8_t pool_queue_usb_rx[APP_QUEUE_RX_MSG_COUNT * (APP_QUEUE_RX_MSG_SIZE+12)];
 //static osMutexId_t mutexes_ids[MUTEXES_COUNT];
 //static osSemaphoreId_t semaphore_ids[SEMAPHORE_COUNT];
 
@@ -34,12 +36,26 @@ static void blinky_thread(void * argument)
 static void dsp_thread(void * argument)
 {
     ret_code_t err_code = CODE_SUCCESS;
-    //thread_dsp_init();
+    err_code = thread_dsp_init();
+    if (err_code != CODE_SUCCESS)
+    {
+        app_shutdown();
+        osThreadExit();
+        return;
+    }
     while (1)
     {
-        //err_code = thread_dsp_run();
-        osDelay(1); //TODO:remove
-        if (err_code != CODE_SUCCESS)
+        uint8_t * p_data = NULL;
+        uint16_t length;
+
+        osThreadFlagsWait(THREAD_DSP_WAKEUP_FLAG, osFlagsWaitAny, osWaitForever);
+
+        err_code = thread_dsp_run(&p_data, &length);
+        if (err_code == CODE_NEW_DATA)
+        {
+            thread_communication_transmit(p_data, length);
+        }
+        else if (err_code != CODE_SUCCESS)
         {
             err_set(sys_app_thread);
         }
@@ -59,7 +75,13 @@ static void communication_thread(void * argument)
 {
     while (1)
     {
-        //thread_communication_run();
+        ret_code_t err_code;
+        err_code = thread_communication_run();
+        if (err_code != CODE_SUCCESS)
+        {
+            err_set(sys_app_thread);
+        }
+
         osDelay(10);
 
         if (err_check())
@@ -76,12 +98,9 @@ static void communication_thread(void * argument)
 static void rtos_trace_thread(void * argument)
 {
     static uint32_t tick;
-
     tick = osKernelGetTickCount();
-
     while (1)
     {
-
         tick += APP_THREAD_RTOS_TRACE_PERIOD_MS;
         osDelayUntil(tick);
 
@@ -125,7 +144,11 @@ static void threads_init(void)
 
 static void queues_init(void)
 {
-    ;
+    osMessageQueueAttr_t attr;
+
+    attr.mq_mem = pool_queue_usb_rx;
+    attr.mq_size = sizeof(pool_queue_usb_rx);
+    queues_ids[QUEUE_USB_RX] = osMessageQueueNew(APP_QUEUE_RX_MSG_COUNT, APP_QUEUE_RX_MSG_SIZE, &attr);
 }
 
 
@@ -143,13 +166,28 @@ static void semaphores_init(void)
 
 void app_os_init(void)
 {
+    ret_code_t err_code;
+
     queues_init();
     mutexes_init();
     semaphores_init();
     threads_init();
 
+    thread_rtos_trace_init();
     thread_blinky_init();
-    thread_communication_init();
+
+    thread_communication_init_t thread_comm_init = 
+    {
+        .p_queue_id = &queues_ids[QUEUE_USB_RX],
+        .p_wakeup_thread_id = &thread_ids[THREAD_DSP],
+        .flags = THREAD_DSP_WAKEUP_FLAG,
+    };
+    err_code = thread_communication_init(&thread_comm_init);
+    if (err_code != CODE_SUCCESS)
+    {   
+        app_shutdown();
+        return;
+    }
 
     dbg_printf("<App OS> Initialization successfull\n");
     dbg_printf("<App OS> Application starts.\n");

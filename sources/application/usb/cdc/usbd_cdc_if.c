@@ -1,6 +1,5 @@
 #include "usbd_cdc_if.h"
 #include "app_config.h"
-#include "trace/dbgout.h"
 
 uint8_t UserRxBufferFS[APP_USBD_BUF_SIZES];
 uint8_t UserTxBufferFS[APP_USBD_BUF_SIZES];
@@ -15,6 +14,9 @@ static int8_t CDC_TransmitCplt_FS(uint8_t * pbuf, uint32_t * Len, uint8_t epnum)
 
 USBD_CDC_ItfTypeDef USBD_Interface_fops_FS = {
     CDC_Init_FS, CDC_DeInit_FS, CDC_Control_FS, CDC_Receive_FS, CDC_TransmitCplt_FS};
+
+
+static cdc_evt_handler_t p_callback = NULL;
 
 /* Private functions ---------------------------------------------------------*/
 /**
@@ -111,11 +113,20 @@ static int8_t CDC_Receive_FS(uint8_t * Buf, uint32_t * Len)
 {
     USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
     USBD_CDC_ReceivePacket(&hUsbDeviceFS);
-    char buf[200] = {0};
-    memcpy(buf, Buf, (size_t)*Len);
-    dbg_printf("%s\n", buf);
-    //(void)Buf;
-    //(void)Len;
+    if (p_callback != NULL)
+    {
+        cdc_evt_new_data_t new_data_params = 
+        {
+            .p_data = Buf,
+            .p_length = (uint16_t *)Len
+        };
+        cdc_evt_params_t params = 
+        {
+            .evt_type = CDC_EVT_NEW_DATA_RECEIVED,
+            .evt.new_data = new_data_params,
+        };
+        p_callback(params);
+    }    
     return (USBD_OK);
 }
 
@@ -158,8 +169,33 @@ uint8_t CDC_Transmit_FS(uint8_t * Buf, uint16_t Len)
 static int8_t CDC_TransmitCplt_FS(uint8_t * Buf, uint32_t * Len, uint8_t epnum)
 {
     uint8_t result = USBD_OK;
+    if (p_callback != NULL)
+    {
+        cdc_evt_transmission_cmplt_t transmission_cmplt_data = 
+        {
+            .p_data = Buf,
+            .p_length = (uint16_t *)Len,
+            .epnum = epnum
+        };
+        cdc_evt_params_t params =
+        {
+            .evt_type = CDC_EVT_TRANSMISSION_COMPLETE,
+            .evt.transmission_cmplt = transmission_cmplt_data
+        };
+        p_callback(params);
+    }
     UNUSED(Buf);
     UNUSED(Len);
     UNUSED(epnum);
     return result;
+}
+
+
+
+void CDC_set_evt_handler(cdc_evt_handler_t p_cb)
+{
+    if (p_cb != NULL)
+    {
+        p_callback = p_cb;
+    }
 }

@@ -85,6 +85,8 @@
       <file file_name="../../../sources/application/board_config.h" />
       <file file_name="../../../sources/application/thread_communication.c" />
       <file file_name="../../../sources/application/thread_rtos_trace.c" />
+      <file file_name="../../../sources/application/thread_dsp.c" />
+      <file file_name="../../../sources/application/thread_dsp.h" />
     </folder>
     <folder Name="sdk_config">
       <file file_name="../../../sources/application/sdk_config/FreeRTOSConfig.h" />
