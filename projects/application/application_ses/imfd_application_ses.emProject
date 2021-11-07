@@ -115,6 +115,10 @@
         </file>
       </folder>
     </folder>
+    <folder Name="dsp">
+      <file file_name="../../../sources/application/dsp/fft_sfm.c" />
+      <file file_name="../../../sources/application/dsp/fft_sfm.h" />
+    </folder>
   </project>
   <configuration
     Name="Debug"
