@@ -7,6 +7,7 @@
 
 ret_code_t app_init(void);
 
+ret_code_t app_cpu_clock_config(void);
 
 void app_shutdown(void);
 
