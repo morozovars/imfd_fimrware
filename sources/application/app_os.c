@@ -12,7 +12,8 @@
 
 static osThreadId_t thread_ids[THREADS_CNT];
 static osMessageQueueId_t queues_ids[QUEUES_COUNT];
-static uint8_t pool_queue_usb_rx[APP_QUEUE_RX_MSG_COUNT * (APP_QUEUE_RX_MSG_SIZE+12)];
+static uint8_t pool_queue_usb_rx[APP_QUEUE_RX_MSG_COUNT * (APP_QUEUE_RX_MSG_SIZE)];
+static uint8_t cb_queue[QUEUES_COUNT][sizeof(StaticQueue_t)];
 //static osMutexId_t mutexes_ids[MUTEXES_COUNT];
 //static osSemaphoreId_t semaphore_ids[SEMAPHORE_COUNT];
 
@@ -36,13 +37,6 @@ static void blinky_thread(void * argument)
 static void dsp_thread(void * argument)
 {
     ret_code_t err_code = CODE_SUCCESS;
-    err_code = thread_dsp_init();
-    if (err_code != CODE_SUCCESS)
-    {
-        app_shutdown();
-        osThreadExit();
-        return;
-    }
     while (1)
     {
         uint8_t * p_data = NULL;
@@ -80,6 +74,7 @@ static void communication_thread(void * argument)
         if (err_code != CODE_SUCCESS)
         {
             err_set(sys_app_thread);
+            break;
         }
 
         osDelay(10);
@@ -148,6 +143,8 @@ static void queues_init(void)
 
     attr.mq_mem = pool_queue_usb_rx;
     attr.mq_size = sizeof(pool_queue_usb_rx);
+    attr.cb_mem = cb_queue[QUEUE_USB_RX];
+    attr.cb_size = sizeof(StaticQueue_t);
     queues_ids[QUEUE_USB_RX] = osMessageQueueNew(APP_QUEUE_RX_MSG_COUNT, APP_QUEUE_RX_MSG_SIZE, &attr);
 }
 
@@ -185,6 +182,17 @@ void app_os_init(void)
     err_code = thread_communication_init(&thread_comm_init);
     if (err_code != CODE_SUCCESS)
     {   
+        app_shutdown();
+        return;
+    }
+
+    thread_dsp_init_t thread_dsp_cfg = 
+    {
+        .p_new_data_queue = &queues_ids[QUEUE_USB_RX]
+    };
+    err_code = thread_dsp_init(&thread_dsp_cfg);
+    if (err_code != CODE_SUCCESS)
+    {
         app_shutdown();
         return;
     }

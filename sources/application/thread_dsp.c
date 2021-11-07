@@ -1,17 +1,29 @@
 #include "thread_dsp.h"
+#include "app_config.h"
 #include <string.h>
 
 
-ret_code_t thread_dsp_init(void)
+osMessageQueueId_t * p_new_data_queue;
+
+
+ret_code_t thread_dsp_init(thread_dsp_init_t * p_init)
 {
+    p_new_data_queue = p_init->p_new_data_queue;
     return CODE_SUCCESS;
 }
 
 
 ret_code_t thread_dsp_run(uint8_t ** p_data, uint16_t * p_length)
 {
-    static const char message[] = "Hello from dsp thread!\n";
-    *p_data = (uint8_t *)message;
-    *p_length = strlen(message);
+    ret_code_t err_code = CODE_SUCCESS;
+    app_queue_rx_msg_t msg;
+
+    err_code = os_status2code(osMessageQueueGet(*p_new_data_queue, &msg, 0u, 0u));
+    if (err_code != CODE_SUCCESS)
+    {
+        return err_code;
+    }
+    *p_data = msg.buf;
+    *p_length = msg.length;
     return CODE_NEW_DATA;
 }
