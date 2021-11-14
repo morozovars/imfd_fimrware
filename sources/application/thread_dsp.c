@@ -1,6 +1,7 @@
 #include "thread_dsp.h"
 #include "app_config.h"
 #include <string.h>
+#include "trace/dbgout.h"
 
 
 osMessageQueueId_t * p_new_data_queue;
@@ -12,6 +13,8 @@ ret_code_t thread_dsp_init(thread_dsp_init_t * p_init)
     return CODE_SUCCESS;
 }
 
+double mean = 0;
+uint16_t count;
 
 ret_code_t thread_dsp_run(uint8_t ** p_data, uint16_t * p_length)
 {
@@ -25,12 +28,23 @@ ret_code_t thread_dsp_run(uint8_t ** p_data, uint16_t * p_length)
         return err_code;
     }
     //TODO:remove, echo debug only;
-    *p_data = msg.buf;
-    *p_length = msg.length;
+
+    mean += *(double *)msg.buf;
+    count++;
+    if (count == 2000u)
+    {
+        double old_mean = mean / 2000u;
+        dbg_printf("mean = %2.2f\n", old_mean);
+        *p_data = (uint8_t *)&old_mean;
+        *p_length = sizeof(mean);
+        mean = 0.0f;
+        count = 0u;
+        return CODE_NEW_DATA;
+    }
 
     /// Parse message.
 
     /// Apply signal processing algorithms.
 
-    return CODE_NEW_DATA;
+    return CODE_SUCCESS;
 }
