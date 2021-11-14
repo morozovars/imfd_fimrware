@@ -120,13 +120,13 @@ static void threads_init(void)
     thread_ids[THREAD_BLINKY] = osThreadNew(blinky_thread, NULL, &attr);
 
     attr.name = "dsp";
-    attr.priority = osPriorityNormal;
+    attr.priority = osPriorityAboveNormal;
     attr.stack_size = 4096;
     thread_ids[THREAD_DSP] = osThreadNew(dsp_thread, NULL, &attr);
 
     attr.name = "communication";
     attr.priority = osPriorityAboveNormal;
-    attr.stack_size = 512;
+    attr.stack_size = 8192;
     thread_ids[THREAD_COMMUNICATION] = osThreadNew(communication_thread, NULL, &attr);
 
 
@@ -146,6 +146,8 @@ static void queues_init(void)
     attr.cb_mem = cb_queue[QUEUE_USB_RX];
     attr.cb_size = sizeof(StaticQueue_t);
     queues_ids[QUEUE_USB_RX] = osMessageQueueNew(APP_QUEUE_RX_MSG_COUNT, APP_QUEUE_RX_MSG_SIZE, &attr);
+
+    queues_ids[QUEUE_MEAS] = osMessageQueueNew(APP_QUEUE_MEAS_COUNT, APP_QUEUE_MEAS_MSG_SIZE, NULL);
 }
 
 
@@ -175,8 +177,10 @@ void app_os_init(void)
 
     thread_communication_init_t thread_comm_init = 
     {
-        .p_queue_id = &queues_ids[QUEUE_USB_RX],
+        .p_queue_msg_id = &queues_ids[QUEUE_USB_RX],
+        .p_queue_meas_id = &queues_ids[QUEUE_MEAS],
         .p_wakeup_thread_id = &thread_ids[THREAD_DSP],
+        .p_cur_thread_id = &thread_ids[THREAD_COMMUNICATION],
         .flags = THREAD_DSP_WAKEUP_FLAG,
     };
     err_code = thread_communication_init(&thread_comm_init);
@@ -188,7 +192,7 @@ void app_os_init(void)
 
     thread_dsp_init_t thread_dsp_cfg = 
     {
-        .p_new_data_queue = &queues_ids[QUEUE_USB_RX]
+        .p_new_data_queue = &queues_ids[QUEUE_MEAS]
     };
     err_code = thread_dsp_init(&thread_dsp_cfg);
     if (err_code != CODE_SUCCESS)

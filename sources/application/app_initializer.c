@@ -66,6 +66,7 @@ ret_code_t app_cpu_clock_config(void)
     {
         return CODE_ERROR;
     }
+
     return CODE_SUCCESS;
 }
 
@@ -96,6 +97,11 @@ ret_code_t app_init(void)
         return err_code;
     }
     dbg_printf("<App Init> Initialization successfull\n");
+
+    dbg_printf("<App Init> PCLK1 freq = %d Hz\n", HAL_RCC_GetPCLK1Freq());
+    dbg_printf("<App Init> PCLK2 freq = %d Hz\n", HAL_RCC_GetPCLK2Freq());
+    dbg_printf("<App Init> SysClock freq = %d Hz\n", HAL_RCC_GetSysClockFreq());
+
     return CODE_SUCCESS;
 }
 
