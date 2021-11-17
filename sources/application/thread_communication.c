@@ -91,9 +91,6 @@ ret_code_t thread_communication_init(thread_communication_init_t * p_init)
 }
 
 
-uint32_t sum;
-uint32_t thousand = 1000;
-uint8_t meas_buf[8192];
 ret_code_t thread_communication_run(void)
 {
     app_queue_rx_msg_t msg;
@@ -119,16 +116,13 @@ ret_code_t thread_communication_run(void)
             {
                 return CODE_ERROR;
             }
-            if ((sum + msg.length) < 8192)
+
+            dbg_printf("Len = %d:\t0x", msg.length);
+            for (uint8_t i = 0; i < msg.length; i++)
             {
-                memcpy(&meas_buf[sum], msg.buf, msg.length);
-                sum+= msg.length;
+                dbg_printf("%02x", msg.buf[i]);
             }
-            if (sum > thousand)
-            {
-                dbg_printf("sum = %d\n", sum);
-                thousand += 1000u;
-            }
+            dbg_printf("\n");
             //memcpy(&meas.data, msg.buf, sizeof(meas.data));
             //osMessageQueuePut(*p_queue_meas, &meas, 0u, 0u);
             //osThreadFlagsSet(*p_wakeup_thread_id, wakeup_flags);
