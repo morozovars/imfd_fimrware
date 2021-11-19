@@ -14,14 +14,10 @@
 
 osMessageQueueId_t * p_new_data_queue;
 static double sum = 0;
-static double mean;
+static double mean[2];
 static uint32_t cur_count = 0;
 static uint32_t total_meas_count = 0;
 
-double get_result(void)
-{
-    return mean;
-}
 
 int32_t process_measurements(uint8_t * p_buf, uint32_t length)
 {
@@ -34,20 +30,22 @@ int32_t process_measurements(uint8_t * p_buf, uint32_t length)
     for (uint16_t i = 0; i < meas_count; i++)
     {
         sum += p_cur_meas[i];
+
+        /// Apply signal processing algorithms.
+
         cur_count++;
         if (cur_count >= 2000)
         {
-            mean = sum / 2000;
-            thread_communication_transmit((uint8_t *)&mean, sizeof(mean));
-            APP_PRINTF("Result = %2.2f", mean);
+            mean[0] = sum / 2000;
+            mean[1] = mean[0] - 1.0f;
+            thread_communication_transmit((uint8_t *)mean, sizeof(mean));
+            APP_PRINTF("Result = %2.2f", mean[0]);
             sum = 0.0f;
             cur_count = 0;
             ret_code = 1;
         }
         total_meas_count++;
     }
-
-    /// Apply signal processing algorithms.
 
     return ret_code;
 }
