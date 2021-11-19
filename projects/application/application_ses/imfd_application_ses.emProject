@@ -34,6 +34,8 @@
       link_linker_script_file="SEGGER_Flash.icf"
       linker_additional_files="$(ProjectDir)/../../ses_scomp/Output/Debug/Exe/ses_scomp.a"
       linker_output_format="hex"
+      linker_printf_fp_enabled="Double"
+      linker_scanf_fp_enabled="No"
       linker_section_placements_segments="FLASH1 RX 0x08000000 0x00040000;RAM1 RWX 0x20000000 0x00020000"
       project_dependencies="stm32g4xx_cmsis_hal(stm32g4xx_cmsis_hal);stm32g4xx_freertos(stm32g4xx_freertos)"
       project_directory=""
@@ -69,7 +71,6 @@
     <folder Name="application">
       <file file_name="../../../sources/application/main.c" />
       <folder Name="trace">
-        <file file_name="../../../sources/application/trace/app_trace.c" />
         <file file_name="../../../sources/application/trace/err_handler.c" />
         <file file_name="../../../sources/application/trace/dbgout.h" />
       </folder>
@@ -77,6 +78,7 @@
       <folder Name="cpu">
         <file file_name="../../../sources/application/cpu/gpio.c" />
         <file file_name="../../../sources/application/cpu/core_it.c" />
+        <file file_name="../../../sources/application/trace/app_trace.c" />
       </folder>
       <file file_name="../../../sources/application/app_os.h" />
       <file file_name="../../../sources/application/app_initializer.c" />

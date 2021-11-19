@@ -7,10 +7,26 @@
 #include "cmsis_os2.h"
 
 
+enum {
+    COMMUNICATION_DATA_TYPE_MEASURE       = 0xAA,
+    COMMUNICATION_DATA_TYPE_SET_FREQ      = 0xAB,
+    COMMUNICATION_DATA_TYPE_SET_MEAS_TYPE = 0xAC,
+};
+
+enum {
+    COMMUNICATION_HEADER_LENGTH           = 8u, // 1 byte data type + 3 bytes dummy + 4 bytes length.
+};
+
+enum {
+    COMMUNICATION_MEAS_TYPE_CURRENT =       0u,
+    COMMUNICATION_MEAS_TYPE_VIB_VERTICAL =  1u,
+    COMMUNICATION_MEAS_TYPE_VIB_AXIAL =     2u,
+};
+
+
 typedef struct
 {
     osMessageQueueId_t *      p_queue_msg_id;
-    osMessageQueueId_t *      p_queue_meas_id;
     osThreadId_t  *           p_wakeup_thread_id;
     osThreadId_t  *           p_cur_thread_id;
     uint32_t                  flags;

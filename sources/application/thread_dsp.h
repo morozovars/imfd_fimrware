@@ -8,6 +8,7 @@
 
 #define THREAD_DSP_WAKEUP_FLAG        0x00000001
 
+#define THREAD_MEAS_SIZE              sizeof(double)
 
 typedef struct 
 {
@@ -18,7 +19,7 @@ typedef struct
 ret_code_t thread_dsp_init(thread_dsp_init_t * p_init);
 
 
-ret_code_t thread_dsp_run(uint8_t ** p_data, uint16_t * p_length);
+ret_code_t thread_dsp_run(void);
 
 
 #endif // THREAD_DSP_H_
