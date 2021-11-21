@@ -12,8 +12,8 @@
 
 /* USBD config. */
 #define APP_USBD_IRQ_PRIO                         (6u)
-#define APP_USBD_BUF_SIZES                        (2048)
-#define APP_QUEUE_RX_MSG_COUNT                    (512u)
+#define APP_USBD_BUF_SIZES                        (128)
+#define APP_QUEUE_RX_MSG_COUNT                    (256u)
 
 
 typedef struct

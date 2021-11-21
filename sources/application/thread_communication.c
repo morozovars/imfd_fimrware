@@ -1,6 +1,7 @@
 #include "thread_communication.h"
 #include "app_config.h"
 #include "app_initializer.h"
+#include "fft_sfm.h"
 
 #include "usbd_cdc.h"
 #include "usbd_cdc_if.h"
@@ -166,6 +167,7 @@ ret_code_t thread_communication_run(void)
         uint32_t sample_freq;
         memcpy(&sample_freq, msg.data.buf, sizeof(sample_freq));
         APP_PRINTF("Update Fs, new Fs = %d", sample_freq);
+        fft_sfm_set_fs(sample_freq);
     }
     if (flag == THREAD_COMMUNICATION_FLAG_SET_MEAS)
     {
@@ -185,12 +187,15 @@ ret_code_t thread_communication_run(void)
         {
             case COMMUNICATION_MEAS_TYPE_CURRENT:
                 APP_PRINTF("Set meas, new type - Current");
+                fft_sfm_set_meas_type(IMFD_MEAS_SINGLE_CURRENT);
                 break;
             case COMMUNICATION_MEAS_TYPE_VIB_AXIAL:
                 APP_PRINTF("Set meas, new type - Vibration Axial");
+                fft_sfm_set_meas_type(IMFD_MEAS_VIB_AXIAL);
                 break;
             case COMMUNICATION_MEAS_TYPE_VIB_VERTICAL:
                 APP_PRINTF("Set meas, new type - Vibration Vertical");
+                fft_sfm_set_meas_type(IMFD_MEAS_VIB_RADIAL);
                 break;
             default:
                 APP_PRINTF("Set meas, received unknown type. Ignored.");

@@ -29,7 +29,7 @@ void thread_rtos_trace_run(osThreadId_t * p_thread_ids, uint32_t tick_cur)
     /// Check if required_delay not expired.
     if (dt < APP_RTOS_TRACE_PRINTOUT_PERIOD_MS)
     {
-        return CODE_SUCCESS;
+        return;
     }
 
     app_trace_print_timestat();

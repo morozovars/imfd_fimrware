@@ -44,6 +44,7 @@ typedef enum
 {
     IMFD_MEAS_VIB_RADIAL,
     IMFD_MEAS_VIB_AXIAL,
+    IMFD_MEAS_VIB_DOUBLE,
     IMFD_MEAS_SINGLE_CURRENT,
     IMFD_MEAS_THREE_PHASES_CURRENTS,
 } imfd_meas_type_t;
@@ -104,6 +105,7 @@ typedef struct MEAS_STRUCT_ALIGN
         imfd_meas_vib_double_t      vib_double;
         imfd_meas_currents_t        cur_all;
         imfd_meas_single_current_t  cur_single;
+        POINT_PRECISION             raw[3];
     } data;
 } imfd_meas_t;
 
@@ -121,8 +123,9 @@ typedef enum
 
 imfd_ret_t fft_sfm_init(void);
 imfd_ret_t fft_sfm_set_fs(uint32_t new_freq);
+imfd_ret_t fft_sfm_set_meas_type(imfd_meas_type_t new_type);
 imfd_ret_t fft_sfm_singal_processing(imfd_meas_t meas);
-imfd_ret_t fft_sfm_get_result(POINT_PRECISION p_slope);
+imfd_ret_t fft_sfm_get_result(POINT_PRECISION * p_slope);
 
 
 #endif // FFT_SFM_H_

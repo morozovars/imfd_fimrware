@@ -1,4 +1,5 @@
 #include "thread_dsp.h"
+#include "fft_sfm.h"
 #include "thread_communication.h"
 #include "app_config.h"
 #include <string.h>
@@ -19,20 +20,26 @@ static uint32_t cur_count = 0;
 static uint32_t total_meas_count = 0;
 
 
-int32_t process_measurements(uint8_t * p_buf, uint32_t length)
+static void process_measurements(uint8_t * p_buf, uint32_t length)
 {
-    
+    imfd_ret_t ret_code;
+
     /// Parse message.
-    int16_t ret_code = 0;
     double * p_cur_meas = (double *)p_buf;
 
     uint32_t meas_count = length / THREAD_MEAS_SIZE;
     for (uint16_t i = 0; i < meas_count; i++)
     {
-        sum += p_cur_meas[i];
-
         /// Apply signal processing algorithms.
+        imfd_meas_t meas;
+        memcpy(meas.data.raw, &p_cur_meas[i], THREAD_MEAS_SIZE);
+        ret_code = fft_sfm_singal_processing(meas);
+        if (ret_code == IMFD_DRDY)
+        {
+            //TODO: get slopes and transmit;
+        }
 
+        sum += p_cur_meas[i];
         cur_count++;
         if (cur_count >= 2000)
         {
@@ -42,18 +49,18 @@ int32_t process_measurements(uint8_t * p_buf, uint32_t length)
             APP_PRINTF("Result = %2.2f", mean[0]);
             sum = 0.0f;
             cur_count = 0;
-            ret_code = 1;
         }
         total_meas_count++;
     }
-
-    return ret_code;
 }
 
 
 ret_code_t thread_dsp_init(thread_dsp_init_t * p_init)
 {
     p_new_data_queue = p_init->p_new_data_queue;
+
+    fft_sfm_init();
+
     return CODE_SUCCESS;
 }
 
