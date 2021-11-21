@@ -25,6 +25,7 @@ static void process_measurements(uint8_t * p_buf, uint32_t length)
     double * p_cur_meas = (double *)p_buf;
     POINT_PRECISION slopes[2];
     POINT_PRECISION * p_data;
+    uint16_t data_length;
 
     uint32_t meas_count = length / THREAD_MEAS_SIZE;
     for (uint16_t i = 0; i < meas_count; i++)
@@ -36,10 +37,9 @@ static void process_measurements(uint8_t * p_buf, uint32_t length)
         if (ret_code == IMFD_DRDY)
         {
             // TODO: get slopes and transmit;
-            fft_sfm_get_fft_buf(&p_data);
+            fft_sfm_get_fft_buf(&p_data, &data_length);
             thread_communication_transmit(
-                COMMUNICATION_RET_MSG_TYPE_DEBUG_CMPLX_MAG, (uint8_t *)p_data, 2040); // just a part of the spectrum
-            APP_PRINTF("Result = %2.2f", p_data[0]);
+                COMMUNICATION_RET_MSG_TYPE_DEBUG_CMPLX_MAG, (uint8_t *)p_data, data_length); // just a part of the spectrum
         }
         total_meas_count++;
     }

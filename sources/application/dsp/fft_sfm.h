@@ -42,10 +42,26 @@
 #define USE_VECTOR_PARAMETERS
 #endif
 
+#ifndef IMFD_CONFIG_GMV_MAX_ORDER
+#define GMV_MAX_ORDER                     (15.0f)
+#else
+#define GMV_MAX_ORDER                     (IMFD_CONFIG_GMV_MAX_ORDER)
+#endif
 
-//TODO: selection of the closest to power of 2 value based on calculated.
+#ifndef IMFD_CONFIG_GMV_MIN_ORDER
+#define GMV_MIN_ORDER                     (-15.0f)
+#else
+#define GMV_MIN_ORDER                     (IMFD_CONFIG_GMV_MIN_ORDER)
+#endif
+
+#ifndef IMFD_CONFIG_GMV_RESOLUTION
+#define GMV_P                             (100u)
+#else
+#define GMV_P                             (IMFD_CONFIG_GMV_RESOLUTION)
+#endif
+
 #define TIME_WINDOW_MEAS_COUNT_     ((TIME_WINDOW_MS * FREQ_AFTER_DECIMATION_HZ) / 1000)
-#define TIME_WINDOW_MEAS_COUNT      (512)
+#define TIME_WINDOW_MEAS_COUNT      (1024)  // Should be power of 2.
 
 
 
@@ -129,14 +145,14 @@ typedef struct MEAS_STRUCT_ALIGN
 
 enum
 {
-    IFR1_CUR_FREQ1 = 30u,
-    IFR1_CUR_FREQ2 = 70u,
+    IFR1_CUR_FREQ1 = 25u,
+    IFR1_CUR_FREQ2 = 125u,
     IFR_CUR_COUNT = 1u,
 
     IFR1_VIB_FREQ1 = 0u,
-    IFR1_VIB_FREQ2 = 250u,
-    IFR2_VIB_FREQ1 = 30u,
-    IFR2_VIB_FREQ2 = 70u,
+    IFR1_VIB_FREQ2 = 70u,
+    IFR2_VIB_FREQ1 = 320u,
+    IFR2_VIB_FREQ2 = 400u,
     IFR_VIB_COUNT = 2u,
 
     IFR_MAX_COUNT = IFR_VIB_COUNT,
@@ -159,7 +175,7 @@ imfd_ret_t fft_sfm_set_fs(uint32_t new_freq);
 imfd_ret_t fft_sfm_set_meas_type(imfd_meas_type_t new_type);
 imfd_ret_t fft_sfm_singal_processing(imfd_meas_t meas);
 void fft_sfm_get_result(POINT_PRECISION * p_slope);
-void fft_sfm_get_fft_buf(POINT_PRECISION ** p_buf);
+void fft_sfm_get_fft_buf(POINT_PRECISION ** p_buf, uint16_t * p_len);
 
 
 #endif // FFT_SFM_H_
