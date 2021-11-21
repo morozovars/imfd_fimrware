@@ -14,9 +14,6 @@
 
 
 osMessageQueueId_t * p_new_data_queue;
-static double sum = 0;
-static double mean[2];
-static uint32_t cur_count = 0;
 static uint32_t total_meas_count = 0;
 
 
@@ -26,6 +23,8 @@ static void process_measurements(uint8_t * p_buf, uint32_t length)
 
     /// Parse message.
     double * p_cur_meas = (double *)p_buf;
+    POINT_PRECISION slopes[2];
+    POINT_PRECISION * p_data;
 
     uint32_t meas_count = length / THREAD_MEAS_SIZE;
     for (uint16_t i = 0; i < meas_count; i++)
@@ -37,19 +36,10 @@ static void process_measurements(uint8_t * p_buf, uint32_t length)
         if (ret_code == IMFD_DRDY)
         {
             // TODO: get slopes and transmit;
-        }
-
-        sum += p_cur_meas[i];
-        cur_count++;
-        if (cur_count >= 2000)
-        {
-            mean[0] = sum / 2000;
-            mean[1] = mean[0] - 1.0f;
+            fft_sfm_get_fft_buf(&p_data);
             thread_communication_transmit(
-                COMMUNICATION_RET_MSG_TYPE_DOUBLE_SLOPE, (uint8_t *)mean, sizeof(mean));
-            APP_PRINTF("Result = %2.2f", mean[0]);
-            sum = 0.0f;
-            cur_count = 0;
+                COMMUNICATION_RET_MSG_TYPE_DEBUG_CMPLX_MAG, (uint8_t *)p_data, 2040); // just a part of the spectrum
+            APP_PRINTF("Result = %2.2f", p_data[0]);
         }
         total_meas_count++;
     }

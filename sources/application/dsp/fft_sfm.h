@@ -43,6 +43,12 @@
 #endif
 
 
+//TODO: selection of the closest to power of 2 value based on calculated.
+#define TIME_WINDOW_MEAS_COUNT_     ((TIME_WINDOW_MS * FREQ_AFTER_DECIMATION_HZ) / 1000)
+#define TIME_WINDOW_MEAS_COUNT      (512)
+
+
+
 /**
   * @brief: Type of measured parameter(s).
   */
@@ -152,7 +158,8 @@ imfd_ret_t fft_sfm_init(void);
 imfd_ret_t fft_sfm_set_fs(uint32_t new_freq);
 imfd_ret_t fft_sfm_set_meas_type(imfd_meas_type_t new_type);
 imfd_ret_t fft_sfm_singal_processing(imfd_meas_t meas);
-imfd_ret_t fft_sfm_get_result(POINT_PRECISION * p_slope);
+void fft_sfm_get_result(POINT_PRECISION * p_slope);
+void fft_sfm_get_fft_buf(POINT_PRECISION ** p_buf);
 
 
 #endif // FFT_SFM_H_

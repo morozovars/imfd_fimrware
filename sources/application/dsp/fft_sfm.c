@@ -4,20 +4,16 @@
 #include "arm_math.h"
 #include <math.h>
 
-//TODO: selection of the closest to power of 2 value based on calculated.
-#define TIME_WINDOW_MEAS_COUNT_X      ((TIME_WINDOW_MS * FREQ_AFTER_DECIMATION_HZ) / 1000)
-#define TIME_WINDOW_MEAS_COUNT      (1024)
-
 
 static uint32_t sample_freq = 1000;
 static imfd_meas_t decimated_measurement[TIME_WINDOW_MEAS_COUNT];
-static POINT_PRECISION cmplx_fft_result[2][TIME_WINDOW_MEAS_COUNT];
+static POINT_PRECISION cmplx_fft_result[TIME_WINDOW_MEAS_COUNT][2];
 static uint32_t cur_decimation_count = 0;
 static uint32_t decimation_coef;
 static uint32_t cur_timewindow_count = 0;
 static imfd_meas_type_t meas_type = IMFD_MEAS_VIB_RADIAL;
 static arm_rfft_fast_instance_f64 m_rfft;
-static uint32_t ifr_idx[2][IFR_MAX_COUNT];
+static uint32_t ifr_idx[IFR_MAX_COUNT][2];
 
 
 static imfd_ret_t decimation(imfd_meas_t meas)
@@ -100,7 +96,7 @@ imfd_ret_t fft_sfm_init(void)
     decimation_coef = sample_freq / FREQ_AFTER_DECIMATION_HZ;
 
     /// Init CMSIS's FFT.
-    arm_status init_code = arm_rfft_fast_init_f64(&m_rfft, 1024);
+    arm_status init_code = arm_rfft_fast_init_f64(&m_rfft, TIME_WINDOW_MEAS_COUNT);
     if (init_code != ARM_MATH_SUCCESS)
     {
         return IMFD_ERROR;
@@ -133,19 +129,15 @@ imfd_ret_t fft_sfm_singal_processing(imfd_meas_t meas)
     arm_rfft_fast_f64(&m_rfft, decimated_measurement[0].data.raw, cmplx_fft_result[0], 0u);
     cmplx_mag(cmplx_fft_result[0], decimated_measurement[0].data.raw, TIME_WINDOW_MEAS_COUNT);
 
+    //TODO: debug only
+    return IMFD_DRDY;
+
     // select IFR
 
     // caclulate GMVs
 
     // calculate slopes
     (void)meas;
-    return IMFD_OK;
-}
-
-
-imfd_ret_t fft_sfm_get_result(POINT_PRECISION * p_slope)
-{
-    (void)p_slope;
     return IMFD_OK;
 }
 
@@ -161,4 +153,17 @@ imfd_ret_t fft_sfm_set_meas_type(imfd_meas_type_t new_type)
 {
     meas_type = new_type;
     return IMFD_OK;
+}
+
+
+void fft_sfm_get_result(POINT_PRECISION * p_slope)
+{
+    (void)p_slope;
+}
+
+
+void fft_sfm_get_fft_buf(POINT_PRECISION ** p_buf)
+{
+    /// When fft_sfm_signal_processing return IMFD_DRDY, in buffer decimated_measurement Fourier spectrum.
+    *p_buf = decimated_measurement[0].data.raw;
 }
