@@ -1,8 +1,8 @@
 #include "usbd_cdc_if.h"
 #include "app_config.h"
 
-uint8_t UserRxBufferFS[APP_USBD_BUF_SIZES];
-uint8_t UserTxBufferFS[APP_USBD_BUF_SIZES];
+uint8_t UserRxBufferFS[APP_USBD_RX_BUF_SIZE];
+uint8_t UserTxBufferFS[APP_USBD_TX_BUF_SIZE];
 
 extern USBD_HandleTypeDef hUsbDeviceFS;
 

@@ -22,4 +22,7 @@ ret_code_t thread_dsp_init(thread_dsp_init_t * p_init);
 ret_code_t thread_dsp_run(void);
 
 
+void thread_dsp_stop_meas_stream_cb(void);
+
+
 #endif // THREAD_DSP_H_

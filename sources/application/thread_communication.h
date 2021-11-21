@@ -14,7 +14,11 @@ enum {
 };
 
 enum {
-    COMMUNICATION_HEADER_LENGTH           = 8u, // 1 byte data type + 3 bytes dummy + 4 bytes length.
+    COMMUNICATION_HEADER_TYPE_IDX =         0u,
+    COMMUNICATION_HEADER_TYPE_SIZE =        1u,
+    COMMUNICATION_HEADER_LEN_IDX =          4u,
+    COMMUNICATION_HEADER_LEN_SIZE =         4u,
+    COMMUNICATION_HEADER_TOTAL_SIZE =           8u, // 1 byte data type + 3 bytes dummy + 4 bytes length.
 };
 
 enum {
@@ -24,18 +28,28 @@ enum {
 };
 
 
+typedef enum
+{
+    COMMUNICATION_RET_MSG_TYPE_DEBUG_FFT =        0xDF,
+    COMMUNICATION_RET_MSG_TYPE_DEBUG_CMPLX_MAG =  0xDC,
+    COMMUNICATION_RET_MSG_TYPE_SINGLE_SLOPE =     0xBA,
+    COMMUNICATION_RET_MSG_TYPE_DOUBLE_SLOPE =     0xBB,
+} communication_ret_msg_type_t;
+
+
 typedef struct
 {
     osMessageQueueId_t *      p_queue_msg_id;
     osThreadId_t  *           p_wakeup_thread_id;
     osThreadId_t  *           p_cur_thread_id;
     uint32_t                  flags;
+    void                      (*stop_stream_cb)(void);
 }thread_communication_init_t;
 
 
 ret_code_t thread_communication_init(thread_communication_init_t * p_init);
 ret_code_t thread_communication_run(void);
-ret_code_t thread_communication_transmit(uint8_t * p_buf, uint16_t len);
+ret_code_t thread_communication_transmit(communication_ret_msg_type_t type, uint8_t * p_buf, uint16_t len);
 
 
 #endif // THREAD_COMMUNICATION_H_

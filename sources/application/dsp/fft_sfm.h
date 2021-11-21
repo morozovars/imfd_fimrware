@@ -36,6 +36,12 @@
 #define FREQ_AFTER_DECIMATION_MS          (IMFD_CONFIG_FINAL_FREQ)
 #endif
 
+#ifndef IMFD_CONFIG_USE_VECTOR_PARAMETERS
+#undef USE_VECTOR_PARAMETERS             
+#else
+#define USE_VECTOR_PARAMETERS
+#endif
+
 
 /**
   * @brief: Type of measured parameter(s).
@@ -44,9 +50,11 @@ typedef enum
 {
     IMFD_MEAS_VIB_RADIAL,
     IMFD_MEAS_VIB_AXIAL,
-    IMFD_MEAS_VIB_DOUBLE,
     IMFD_MEAS_SINGLE_CURRENT,
+#ifdef USE_VECTOR_PARAMETERS
+    IMFD_MEAS_VIB_DOUBLE,
     IMFD_MEAS_THREE_PHASES_CURRENTS,
+#endif
 } imfd_meas_type_t;
 
 
@@ -99,15 +107,34 @@ typedef struct
   */
 typedef struct MEAS_STRUCT_ALIGN
 {
-    imfd_meas_type_t                meas_type;
     union {
         imfd_meas_vib_single_t      vib_single;
+        imfd_meas_single_current_t  cur_single;
+#ifdef USE_VECTOR_PARAMETERS
         imfd_meas_vib_double_t      vib_double;
         imfd_meas_currents_t        cur_all;
-        imfd_meas_single_current_t  cur_single;
         POINT_PRECISION             raw[3];
+#else
+        POINT_PRECISION             raw[1];
+#endif
     } data;
 } imfd_meas_t;
+
+
+enum
+{
+    IFR1_CUR_FREQ1 = 30u,
+    IFR1_CUR_FREQ2 = 70u,
+    IFR_CUR_COUNT = 1u,
+
+    IFR1_VIB_FREQ1 = 0u,
+    IFR1_VIB_FREQ2 = 250u,
+    IFR2_VIB_FREQ1 = 30u,
+    IFR2_VIB_FREQ2 = 70u,
+    IFR_VIB_COUNT = 2u,
+
+    IFR_MAX_COUNT = IFR_VIB_COUNT,
+};
 
 
 /**

@@ -12,7 +12,8 @@
 
 /* USBD config. */
 #define APP_USBD_IRQ_PRIO                         (6u)
-#define APP_USBD_BUF_SIZES                        (128)
+#define APP_USBD_RX_BUF_SIZE                      (CDC_DATA_FS_MAX_PACKET_SIZE)
+#define APP_USBD_TX_BUF_SIZE                      (2048)
 #define APP_QUEUE_RX_MSG_COUNT                    (256u)
 
 

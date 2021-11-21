@@ -31,10 +31,24 @@ static osMessageQueueId_t * p_queue_usb_rx;
 static osThreadId_t * p_wakeup_thread_id;
 static uint32_t wakeup_flags;
 static osThreadId_t * p_cur_thread_id;
+static void (*p_stop_stream_cb)(void);
 static bool is_meas_buf = false;
+static uint32_t total_stream_data_size = 0u;
+static osTimerId_t timer_handle;
+static uint8_t ret_msg_buf[APP_USBD_TX_BUF_SIZE];
+
 
 USBD_HandleTypeDef hUsbDeviceFS;
 extern USBD_DescriptorsTypeDef CDC_Desc;
+
+
+void timer_cb(void * argument)
+{
+    APP_PRINTF("Stream stopped, total data = %d bytes", total_stream_data_size);
+    total_stream_data_size = 0u;
+    p_stop_stream_cb();
+    (void)argument;
+}
 
 
 void cdc_evt_handler(cdc_evt_params_t params)
@@ -55,11 +69,14 @@ void cdc_evt_handler(cdc_evt_params_t params)
                 if (meas_buf_length_cur >= meas_buf_length_target)
                 {
                     is_meas_buf = false;
+                    osThreadFlagsSet(*p_cur_thread_id, THREAD_COMMUNICATION_FLAG_MEAS);
+                    total_stream_data_size += meas_buf_length_cur;
+                    total_stream_data_size += COMMUNICATION_HEADER_TOTAL_SIZE;
                 }
             }
             else
             {
-                process_length -= COMMUNICATION_HEADER_LENGTH;
+                process_length -= COMMUNICATION_HEADER_TOTAL_SIZE;
                 switch (p_rx[0])
                 {
                     case COMMUNICATION_DATA_TYPE_MEASURE:
@@ -67,8 +84,6 @@ void cdc_evt_handler(cdc_evt_params_t params)
                         meas_buf_length_target = *(uint32_t *)&p_rx[4];
                         meas_buf_length_cur = process_length;
                         osThreadFlagsSet(*p_wakeup_thread_id, wakeup_flags);
-                        osThreadFlagsSet(
-                            *p_cur_thread_id, THREAD_COMMUNICATION_FLAG_MEAS); // just to let know.
                         break;
                     case COMMUNICATION_DATA_TYPE_SET_FREQ:
                         osThreadFlagsSet(*p_cur_thread_id, THREAD_COMMUNICATION_FLAG_SET_FREQ);
@@ -77,7 +92,7 @@ void cdc_evt_handler(cdc_evt_params_t params)
                         osThreadFlagsSet(*p_cur_thread_id, THREAD_COMMUNICATION_FLAG_SET_MEAS);
                         break;
                 }
-                p_rx = p_rx + COMMUNICATION_HEADER_LENGTH;
+                p_rx = p_rx + COMMUNICATION_HEADER_TOTAL_SIZE;
             }
             app_queue_rx_msg_t msg;
             memcpy(msg.data.buf, p_rx, process_length);
@@ -124,8 +139,12 @@ ret_code_t thread_communication_init(thread_communication_init_t * p_init)
     p_wakeup_thread_id = p_init->p_wakeup_thread_id;
     p_cur_thread_id = p_init->p_cur_thread_id;
     wakeup_flags = p_init->flags;
+    p_stop_stream_cb = p_init->stop_stream_cb;
 
     ret_code_t err_code = usbd_init();
+
+    total_stream_data_size = 0u;
+    timer_handle = osTimerNew(timer_cb, osTimerOnce, NULL, NULL);
 
     return err_code;
 }
@@ -148,7 +167,8 @@ ret_code_t thread_communication_run(void)
 
     if (flag == THREAD_COMMUNICATION_FLAG_MEAS)
     {
-
+        osTimerStop(timer_handle);
+        osTimerStart(timer_handle, 5000u);
         //NOTE: just to notify this thread.
     }
     if (flag == THREAD_COMMUNICATION_FLAG_SET_FREQ)
@@ -206,10 +226,21 @@ ret_code_t thread_communication_run(void)
 }
 
 
-ret_code_t thread_communication_transmit(uint8_t * p_buf, uint16_t len)
+ret_code_t thread_communication_transmit(communication_ret_msg_type_t type, uint8_t * p_buf, uint16_t len)
 {
     int8_t usbd_code;
-    usbd_code = CDC_Transmit_FS(p_buf, len);
+
+    if ((len+COMMUNICATION_HEADER_TOTAL_SIZE) > APP_USBD_TX_BUF_SIZE)
+    {
+        return CODE_RESOURCES;
+    }
+
+    memset(ret_msg_buf, 0, len + COMMUNICATION_HEADER_TOTAL_SIZE);
+
+    ret_msg_buf[COMMUNICATION_HEADER_TYPE_IDX] = type;
+    memcpy(ret_msg_buf + COMMUNICATION_HEADER_LEN_IDX, &len, sizeof(len));
+    memcpy(ret_msg_buf + COMMUNICATION_HEADER_TOTAL_SIZE, p_buf, len);
+    usbd_code = CDC_Transmit_FS(ret_msg_buf, len+COMMUNICATION_HEADER_TOTAL_SIZE);
     if (usbd_code != USBD_OK)
     {
         return CODE_BUSY;

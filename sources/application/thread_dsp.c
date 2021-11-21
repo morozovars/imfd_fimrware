@@ -1,16 +1,16 @@
 #include "thread_dsp.h"
+#include "app_config.h"
 #include "fft_sfm.h"
 #include "thread_communication.h"
-#include "app_config.h"
 #include <string.h>
 
 #include "trace/dbgout.h"
 
 
-#define APP_PRINTF(...)                                                                             \
-                                    dbg_printf("<DSP> ");                                          \
-                                    dbg_printf(__VA_ARGS__);                                        \
-                                    dbg_printf("\n");
+#define APP_PRINTF(...)                                                                            \
+    dbg_printf("<DSP> ");                                                                          \
+    dbg_printf(__VA_ARGS__);                                                                       \
+    dbg_printf("\n");
 
 
 osMessageQueueId_t * p_new_data_queue;
@@ -36,7 +36,7 @@ static void process_measurements(uint8_t * p_buf, uint32_t length)
         ret_code = fft_sfm_singal_processing(meas);
         if (ret_code == IMFD_DRDY)
         {
-            //TODO: get slopes and transmit;
+            // TODO: get slopes and transmit;
         }
 
         sum += p_cur_meas[i];
@@ -45,7 +45,8 @@ static void process_measurements(uint8_t * p_buf, uint32_t length)
         {
             mean[0] = sum / 2000;
             mean[1] = mean[0] - 1.0f;
-            thread_communication_transmit((uint8_t *)mean, sizeof(mean));
+            thread_communication_transmit(
+                COMMUNICATION_RET_MSG_TYPE_DOUBLE_SLOPE, (uint8_t *)mean, sizeof(mean));
             APP_PRINTF("Result = %2.2f", mean[0]);
             sum = 0.0f;
             cur_count = 0;
@@ -70,8 +71,7 @@ ret_code_t thread_dsp_run(void)
     ret_code_t ret_code = CODE_SUCCESS;
     app_queue_rx_msg_t meas;
     uint16_t count_msg = 0;
-    static double result;
-    
+
     count_msg = osMessageQueueGetCount(*p_new_data_queue);
     while (count_msg)
     {
@@ -86,10 +86,16 @@ ret_code_t thread_dsp_run(void)
             APP_PRINTF("Queue error");
             return ret_code;
         }
-        
-        //TODO: check length?
+
+        // TODO: check length?
         process_measurements(meas.data.buf, meas.length);
     }
 
     return ret_code;
+}
+
+void thread_dsp_stop_meas_stream_cb(void)
+{
+    APP_PRINTF("Total stream meas count = %d", total_meas_count);
+    total_meas_count = 0;
 }

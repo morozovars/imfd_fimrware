@@ -119,7 +119,7 @@ static void threads_init(void)
 
     attr.name = "communication";
     attr.priority = osPriorityAboveNormal;
-    attr.stack_size = 8192;
+    attr.stack_size = 2048;
     thread_ids[THREAD_COMMUNICATION] = osThreadNew(communication_thread, NULL, &attr);
 
 
@@ -172,6 +172,7 @@ void app_os_init(void)
         .p_wakeup_thread_id = &thread_ids[THREAD_DSP],
         .p_cur_thread_id = &thread_ids[THREAD_COMMUNICATION],
         .flags = THREAD_DSP_WAKEUP_FLAG,
+        .stop_stream_cb = thread_dsp_stop_meas_stream_cb,
     };
     err_code = thread_communication_init(&thread_comm_init);
     if (err_code != CODE_SUCCESS)
