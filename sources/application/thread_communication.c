@@ -23,6 +23,7 @@ typedef enum
     THREAD_COMMUNICATION_FLAG_SET_FREQ = 0x01,
     THREAD_COMMUNICATION_FLAG_SET_MEAS = 0x02,
     THREAD_COMMUNICATION_FLAG_MEAS = THREAD_COMMUNICATION_FLAG_SET_MEAS * 2,
+    THREAD_COMMUNICATION_FLAG_SET_REF_GMV = THREAD_COMMUNICATION_FLAG_MEAS * 2,
     THREAD_COMMUNICATION_FLAG_COUNT,
 } flags_t;
 
@@ -42,7 +43,7 @@ USBD_HandleTypeDef hUsbDeviceFS;
 extern USBD_DescriptorsTypeDef CDC_Desc;
 
 
-void timer_cb(void * argument)
+void timer_cb(void  * argument)
 {
     APP_PRINTF("Stream stopped, total data = %d bytes", total_stream_data_size);
     total_stream_data_size = 0u;
@@ -90,6 +91,10 @@ void cdc_evt_handler(cdc_evt_params_t params)
                         break;
                     case COMMUNICATION_DATA_TYPE_SET_MEAS_TYPE:
                         osThreadFlagsSet(*p_cur_thread_id, THREAD_COMMUNICATION_FLAG_SET_MEAS);
+                        break;
+                    case COMMUNICATION_DATA_TYPE_SET_REF_GMV:
+                        osThreadFlagsSet(*p_cur_thread_id, THREAD_COMMUNICATION_FLAG_SET_REF_GMV);
+                    default:
                         break;
                 }
                 p_rx = p_rx + COMMUNICATION_HEADER_TOTAL_SIZE;
@@ -157,7 +162,7 @@ ret_code_t thread_communication_run(void)
 
     uint32_t flag =
         osThreadFlagsWait(THREAD_COMMUNICATION_FLAG_MEAS | THREAD_COMMUNICATION_FLAG_SET_FREQ |
-                              THREAD_COMMUNICATION_FLAG_SET_MEAS,
+                              THREAD_COMMUNICATION_FLAG_SET_MEAS | THREAD_COMMUNICATION_FLAG_SET_REF_GMV,
             osFlagsWaitAny, osWaitForever);
 
     if (flag >= osFlagsErrorISR)
@@ -221,6 +226,11 @@ ret_code_t thread_communication_run(void)
                 APP_PRINTF("Set meas, received unknown type. Ignored.");
                 break;
         };
+    }
+    if (flag == THREAD_COMMUNICATION_FLAG_SET_REF_GMV)
+    {
+        fft_sfm_set_gmv_as_ref();
+        APP_PRINTF("Set current GMV as reference.");
     }
     return CODE_SUCCESS;
 }

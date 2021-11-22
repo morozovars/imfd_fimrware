@@ -122,6 +122,8 @@
     <folder Name="dsp">
       <file file_name="../../../sources/application/dsp/fft_sfm.c" />
       <file file_name="../../../sources/application/dsp/fft_sfm.h" />
+      <file file_name="../../../sources/application/dsp/polyfit.c" />
+      <file file_name="../../../sources/application/dsp/polyfit.h" />
     </folder>
   </project>
   <configuration

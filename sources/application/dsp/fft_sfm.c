@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include "arm_const_structs.h"
 #include "arm_math.h"
+#include "polyfit.h"
 #include <math.h>
 
 //TODO: fix in future,
@@ -37,7 +38,9 @@ static const uint16_t ifr_length[IFR_COUNT] = {
     [IFR_VIB2] = IFR_IND(IFR2_VIB_FREQ2) - IFR_IND(IFR2_VIB_FREQ1),
 };
 static POINT_PRECISION gmv_buf[IFR_MAX_COUNT][GMV_P];
-static POINT_PRECISION temporary[TIME_WINDOW_MEAS_COUNT];
+static bool flag_set_ref_gmv = false;
+static POINT_PRECISION gmv_ref[IFR_MAX_COUNT][GMV_P];
+static POINT_PRECISION poly_coefs[2];
 
 
 static imfd_ret_t decimation(imfd_meas_t meas)
@@ -132,7 +135,7 @@ static void sfm_gmv(POINT_PRECISION * p_src, POINT_PRECISION * p_dst, uint32_t s
     POINT_PRECISION moment_order[GMV_P];
     for (uint32_t i = 0; i < src_length; i++)
     {
-        temporary[i] = p_src[i] / max_val;
+        cmplx_fft_result[0][i] = p_src[i] / max_val;
     }
     for (uint32_t i = 0; i < GMV_P; i++)
     {
@@ -140,7 +143,7 @@ static void sfm_gmv(POINT_PRECISION * p_src, POINT_PRECISION * p_dst, uint32_t s
         POINT_PRECISION sum = 0;
         for (uint32_t j = 0; j < src_length; j++)
         {
-            sum += pow(temporary[j], moment_order[i]) / src_length;
+            sum += pow(cmplx_fft_result[0][j], moment_order[i]) / src_length;
         }
         p_dst[i] = pow(sum, (1/moment_order[i]));
         p_dst[i] = p_dst[i] * max_val;
@@ -165,6 +168,9 @@ imfd_ret_t fft_sfm_init(void)
 
     /// Init parameters.
     meas_type = IMFD_MEAS_VIB_RADIAL;
+
+    /// Reset flags.
+    flag_set_ref_gmv = false;
 
     return IMFD_OK;
 }
@@ -203,9 +209,30 @@ imfd_ret_t fft_sfm_singal_processing(imfd_meas_t meas)
         sfm_gmv((POINT_PRECISION *)p_ifr[IFR_VIB2], gmv_buf[1], ifr_length[IFR_VIB2]);
     }
 
+    /// Set reference GMV if required.
+    if (flag_set_ref_gmv)
+    {
+        flag_set_ref_gmv = false;
+        if (meas_type == IMFD_MEAS_SINGLE_CURRENT)
+        {
+            memcpy(gmv_ref[0], gmv_buf[0], GMV_P * sizeof(POINT_PRECISION));
+        } else if ((meas_type == IMFD_MEAS_VIB_AXIAL) || (meas_type == IMFD_MEAS_VIB_RADIAL))
+        {
+            memcpy(gmv_ref[0], gmv_buf[0], GMV_P * sizeof(POINT_PRECISION));
+            memcpy(gmv_ref[1], gmv_buf[1], GMV_P * sizeof(POINT_PRECISION));
+        }
+    }
 
-    // calculate slopes
-    (void)meas;
+    /// Calculate slopes.
+    if (meas_type == IMFD_MEAS_SINGLE_CURRENT)
+    {
+        polyfit(gmv_ref[0], gmv_buf[0], GMV_P, 1, poly_coefs);
+    } else if ((meas_type == IMFD_MEAS_VIB_AXIAL) || (meas_type == IMFD_MEAS_VIB_RADIAL))
+    {
+        polyfit(gmv_ref[0], gmv_buf[0], GMV_P, 1, poly_coefs);
+        polyfit(gmv_ref[1], gmv_buf[1], GMV_P, 1, &poly_coefs[1]);
+    }
+
     return IMFD_DRDY;
 }
 
@@ -224,9 +251,27 @@ imfd_ret_t fft_sfm_set_meas_type(imfd_meas_type_t new_type)
 }
 
 
-void fft_sfm_get_result(POINT_PRECISION * p_slope)
+void fft_sfm_get_result(POINT_PRECISION ** p_slope, uint16_t * p_len)
 {
-    (void)p_slope;
+    *p_slope = poly_coefs;
+    switch (meas_type)
+    {
+        case IMFD_MEAS_VIB_AXIAL:
+        case IMFD_MEAS_VIB_RADIAL:
+            *p_len = IFR_VIB_COUNT * sizeof(POINT_PRECISION);
+            break;
+        case IMFD_MEAS_SINGLE_CURRENT:
+            *p_len = IFR_CUR_COUNT * sizeof(POINT_PRECISION);
+            break;
+#ifdef USE_VECTOR_PARAMETERS
+        case IMFD_MEAS_VIB_DOUBLE:
+            break;
+        case IMFD_MEAS_THREE_PHASES_CURRENTS:
+            break;
+#endif
+        default:
+            break;
+    }
 }
 
 
@@ -259,4 +304,10 @@ void fft_sfm_get_fft_buf(POINT_PRECISION ** p_buf, uint16_t * p_len)
 void fft_sfm_get_gmv_buf(POINT_PRECISION ** p_buf)
 {
     *p_buf = gmv_buf[0];
+}
+
+
+void fft_sfm_set_gmv_as_ref(void)
+{
+    flag_set_ref_gmv = true;
 }

@@ -174,8 +174,10 @@ imfd_ret_t fft_sfm_init(void);
 imfd_ret_t fft_sfm_set_fs(uint32_t new_freq);
 imfd_ret_t fft_sfm_set_meas_type(imfd_meas_type_t new_type);
 imfd_ret_t fft_sfm_singal_processing(imfd_meas_t meas);
-void fft_sfm_get_result(POINT_PRECISION * p_slope);
+void fft_sfm_get_result(POINT_PRECISION ** p_slope, uint16_t * p_len);
 void fft_sfm_get_fft_buf(POINT_PRECISION ** p_buf, uint16_t * p_len);
+void fft_sfm_get_gmv_buf(POINT_PRECISION ** p_buf);
+void fft_sfm_set_gmv_as_ref(void);
 
 
 #endif // FFT_SFM_H_

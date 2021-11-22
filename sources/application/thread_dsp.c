@@ -23,8 +23,8 @@ static void process_measurements(uint8_t * p_buf, uint32_t length)
 
     /// Parse message.
     double * p_cur_meas = (double *)p_buf;
-    POINT_PRECISION slopes[2];
-    POINT_PRECISION * p_data;
+    POINT_PRECISION * p_slopes;
+    //POINT_PRECISION * p_data;
     uint16_t data_length;
 
     uint32_t meas_count = length / THREAD_MEAS_SIZE;
@@ -37,9 +37,15 @@ static void process_measurements(uint8_t * p_buf, uint32_t length)
         if (ret_code == IMFD_DRDY)
         {
             // TODO: get slopes and transmit;
-            fft_sfm_get_fft_buf(&p_data, &data_length);
-            thread_communication_transmit(
-                COMMUNICATION_RET_MSG_TYPE_DEBUG_CMPLX_MAG, (uint8_t *)p_data, data_length); // just a part of the spectrum
+            //fft_sfm_get_fft_buf(&p_data, &data_length);
+            //thread_communication_transmit(
+            //    COMMUNICATION_RET_MSG_TYPE_DEBUG_CMPLX_MAG, (uint8_t *)p_data, data_length); // just a part of the spectrum
+            //fft_sfm_get_gmv_buf(&p_data);
+            //thread_communication_transmit(
+            //    COMMUNICATION_RET_MSG_TYPE_DEBUG_GMV, (uint8_t *)p_data, GMV_P * sizeof(POINT_PRECISION));
+            fft_sfm_get_result(&p_slopes, &data_length);
+            communication_ret_msg_type_t ret = (data_length == sizeof(POINT_PRECISION)) ? COMMUNICATION_RET_MSG_TYPE_SINGLE_SLOPE : COMMUNICATION_RET_MSG_TYPE_DOUBLE_SLOPE;
+            thread_communication_transmit(ret, (uint8_t *)p_slopes, data_length);
         }
         total_meas_count++;
     }
