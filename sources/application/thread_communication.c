@@ -17,13 +17,15 @@
                                     dbg_printf("\n");
 
 
-
 typedef enum
 {
     THREAD_COMMUNICATION_FLAG_SET_FREQ = 0x01,
     THREAD_COMMUNICATION_FLAG_SET_MEAS = 0x02,
-    THREAD_COMMUNICATION_FLAG_MEAS = THREAD_COMMUNICATION_FLAG_SET_MEAS * 2,
-    THREAD_COMMUNICATION_FLAG_SET_REF_GMV = THREAD_COMMUNICATION_FLAG_MEAS * 2,
+    THREAD_COMMUNICATION_FLAG_MEAS =                    THREAD_COMMUNICATION_FLAG_SET_MEAS               * 2,
+    THREAD_COMMUNICATION_FLAG_USE_DEFAULT_REF_GMV =     THREAD_COMMUNICATION_FLAG_MEAS                   * 2,
+    THREAD_COMMUNICATION_FLAG_USE_CALIB_REF_GMV =       THREAD_COMMUNICATION_FLAG_USE_DEFAULT_REF_GMV    * 2,
+    THREAD_COMMUNICATION_FLAG_USE_CUR_GMV_AS_REF_GMV =  THREAD_COMMUNICATION_FLAG_USE_CALIB_REF_GMV      * 2,
+    THREAD_COMMUNICATION_FLAG_STORE_CUR_GMV_AS_CALIB =  THREAD_COMMUNICATION_FLAG_USE_CUR_GMV_AS_REF_GMV * 2,
     THREAD_COMMUNICATION_FLAG_COUNT,
 } flags_t;
 
@@ -93,7 +95,17 @@ void cdc_evt_handler(cdc_evt_params_t params)
                         osThreadFlagsSet(*p_cur_thread_id, THREAD_COMMUNICATION_FLAG_SET_MEAS);
                         break;
                     case COMMUNICATION_MSG_TYPE_USE_DEFAULT_REF_GMV:
-                        osThreadFlagsSet(*p_cur_thread_id, THREAD_COMMUNICATION_FLAG_SET_REF_GMV);
+                        osThreadFlagsSet(*p_cur_thread_id, THREAD_COMMUNICATION_FLAG_USE_DEFAULT_REF_GMV);
+                        break;
+                    case COMMUNICATION_MSG_TYPE_USE_CALIB_REF_GMV:
+                        osThreadFlagsSet(*p_cur_thread_id, THREAD_COMMUNICATION_FLAG_USE_CALIB_REF_GMV);
+                        break;
+                    case COMMUNICATION_MSG_TYPE_USE_CUR_GMV_AS_REF_GMV:
+                        osThreadFlagsSet(*p_cur_thread_id, THREAD_COMMUNICATION_FLAG_USE_CUR_GMV_AS_REF_GMV);
+                        break;
+                    case COMMUNICATION_MSG_TYPE_STORE_CUR_GMV_AS_CALIB:
+                        osThreadFlagsSet(*p_cur_thread_id, THREAD_COMMUNICATION_FLAG_STORE_CUR_GMV_AS_CALIB);
+                        break;
                     default:
                         break;
                 }
@@ -162,7 +174,9 @@ ret_code_t thread_communication_run(void)
 
     uint32_t flag =
         osThreadFlagsWait(THREAD_COMMUNICATION_FLAG_MEAS | THREAD_COMMUNICATION_FLAG_SET_FREQ |
-                              THREAD_COMMUNICATION_FLAG_SET_MEAS | THREAD_COMMUNICATION_FLAG_SET_REF_GMV,
+                              THREAD_COMMUNICATION_FLAG_SET_MEAS | THREAD_COMMUNICATION_FLAG_USE_DEFAULT_REF_GMV |
+                              THREAD_COMMUNICATION_FLAG_USE_CALIB_REF_GMV | THREAD_COMMUNICATION_FLAG_USE_CUR_GMV_AS_REF_GMV |
+                              THREAD_COMMUNICATION_FLAG_STORE_CUR_GMV_AS_CALIB,
             osFlagsWaitAny, osWaitForever);
 
     if (flag >= osFlagsErrorISR)
@@ -227,10 +241,24 @@ ret_code_t thread_communication_run(void)
                 break;
         };
     }
-    if (flag == THREAD_COMMUNICATION_FLAG_SET_REF_GMV)
+    if (flag == THREAD_COMMUNICATION_FLAG_USE_DEFAULT_REF_GMV)
+    {
+        fft_sfm_set_ref_gmv(IMFD_REF_GMV_LOAD_DEFAULT, NULL);
+        APP_PRINTF("Load default GMV.");
+    }
+    if (flag == THREAD_COMMUNICATION_FLAG_USE_CALIB_REF_GMV)
+    {
+        fft_sfm_set_ref_gmv(IMFD_REF_GMV_LOAD_DEFAULT, NULL);
+        APP_PRINTF("Load calib GMV.");  //TODO:load GMV.
+    }
+    if (flag == THREAD_COMMUNICATION_FLAG_USE_CUR_GMV_AS_REF_GMV)
     {
         fft_sfm_set_ref_gmv(IMFD_REG_GMV_LOAD_FROM_CURRENT, NULL);
         APP_PRINTF("Set current GMV as reference.");
+    }
+    if (flag == THREAD_COMMUNICATION_FLAG_STORE_CUR_GMV_AS_CALIB)
+    {
+        APP_PRINTF("Store current reference GMV to FLASH .");
     }
     return CODE_SUCCESS;
 }
