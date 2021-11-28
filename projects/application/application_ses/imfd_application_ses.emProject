@@ -124,6 +124,7 @@
       <file file_name="../../../sources/application/dsp/fft_sfm.h" />
       <file file_name="../../../sources/application/dsp/polyfit.c" />
       <file file_name="../../../sources/application/dsp/polyfit.h" />
+      <file file_name="../../../sources/application/dsp/gmv_default.h" />
     </folder>
   </project>
   <configuration

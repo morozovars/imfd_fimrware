@@ -229,7 +229,7 @@ ret_code_t thread_communication_run(void)
     }
     if (flag == THREAD_COMMUNICATION_FLAG_SET_REF_GMV)
     {
-        fft_sfm_set_gmv_as_ref();
+        fft_sfm_set_ref_gmv(IMFD_REG_GMV_LOAD_FROM_CURRENT, NULL);
         APP_PRINTF("Set current GMV as reference.");
     }
     return CODE_SUCCESS;
