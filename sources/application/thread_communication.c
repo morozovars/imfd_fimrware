@@ -80,19 +80,19 @@ void cdc_evt_handler(cdc_evt_params_t params)
                 process_length -= COMMUNICATION_HEADER_TOTAL_SIZE;
                 switch (p_rx[0])
                 {
-                    case COMMUNICATION_DATA_TYPE_MEASURE:
+                    case COMMUNICATION_MSG_TYPE_MEASURE:
                         is_meas_buf = true;
                         meas_buf_length_target = *(uint32_t *)&p_rx[4];
                         meas_buf_length_cur = process_length;
                         osThreadFlagsSet(*p_wakeup_thread_id, wakeup_flags);
                         break;
-                    case COMMUNICATION_DATA_TYPE_SET_FREQ:
+                    case COMMUNICATION_MSG_TYPE_SET_FREQ:
                         osThreadFlagsSet(*p_cur_thread_id, THREAD_COMMUNICATION_FLAG_SET_FREQ);
                         break;
-                    case COMMUNICATION_DATA_TYPE_SET_MEAS_TYPE:
+                    case COMMUNICATION_MSG_TYPE_SET_MEAS_TYPE:
                         osThreadFlagsSet(*p_cur_thread_id, THREAD_COMMUNICATION_FLAG_SET_MEAS);
                         break;
-                    case COMMUNICATION_DATA_TYPE_SET_REF_GMV:
+                    case COMMUNICATION_MSG_TYPE_SET_REF_GMV:
                         osThreadFlagsSet(*p_cur_thread_id, THREAD_COMMUNICATION_FLAG_SET_REF_GMV);
                     default:
                         break;
