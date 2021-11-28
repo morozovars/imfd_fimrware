@@ -92,7 +92,7 @@ void cdc_evt_handler(cdc_evt_params_t params)
                     case COMMUNICATION_MSG_TYPE_SET_MEAS_TYPE:
                         osThreadFlagsSet(*p_cur_thread_id, THREAD_COMMUNICATION_FLAG_SET_MEAS);
                         break;
-                    case COMMUNICATION_MSG_TYPE_SET_REF_GMV:
+                    case COMMUNICATION_MSG_TYPE_USE_DEFAULT_REF_GMV:
                         osThreadFlagsSet(*p_cur_thread_id, THREAD_COMMUNICATION_FLAG_SET_REF_GMV);
                     default:
                         break;
