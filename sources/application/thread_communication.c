@@ -10,22 +10,26 @@
 
 #include "trace/dbgout.h"
 
+#include "stm32g4xx_hal.h"
 
-#define APP_PRINTF(...)                                                                             \
-                                    dbg_printf("<USBD> ");                                          \
-                                    dbg_printf(__VA_ARGS__);                                        \
-                                    dbg_printf("\n");
+
+#define APP_PRINTF(...)                                                                            \
+    dbg_printf("<USBD> ");                                                                         \
+    dbg_printf(__VA_ARGS__);                                                                       \
+    dbg_printf("\n");
 
 
 typedef enum
 {
     THREAD_COMMUNICATION_FLAG_SET_FREQ = 0x01,
     THREAD_COMMUNICATION_FLAG_SET_MEAS = 0x02,
-    THREAD_COMMUNICATION_FLAG_MEAS =                    THREAD_COMMUNICATION_FLAG_SET_MEAS               * 2,
-    THREAD_COMMUNICATION_FLAG_USE_DEFAULT_REF_GMV =     THREAD_COMMUNICATION_FLAG_MEAS                   * 2,
-    THREAD_COMMUNICATION_FLAG_USE_CALIB_REF_GMV =       THREAD_COMMUNICATION_FLAG_USE_DEFAULT_REF_GMV    * 2,
-    THREAD_COMMUNICATION_FLAG_USE_CUR_GMV_AS_REF_GMV =  THREAD_COMMUNICATION_FLAG_USE_CALIB_REF_GMV      * 2,
-    THREAD_COMMUNICATION_FLAG_STORE_CUR_GMV_AS_CALIB =  THREAD_COMMUNICATION_FLAG_USE_CUR_GMV_AS_REF_GMV * 2,
+    THREAD_COMMUNICATION_FLAG_MEAS = THREAD_COMMUNICATION_FLAG_SET_MEAS * 2,
+    THREAD_COMMUNICATION_FLAG_USE_DEFAULT_REF_GMV = THREAD_COMMUNICATION_FLAG_MEAS * 2,
+    THREAD_COMMUNICATION_FLAG_USE_CALIB_REF_GMV = THREAD_COMMUNICATION_FLAG_USE_DEFAULT_REF_GMV * 2,
+    THREAD_COMMUNICATION_FLAG_USE_CUR_GMV_AS_REF_GMV =
+        THREAD_COMMUNICATION_FLAG_USE_CALIB_REF_GMV * 2,
+    THREAD_COMMUNICATION_FLAG_STORE_CUR_GMV_AS_CALIB =
+        THREAD_COMMUNICATION_FLAG_USE_CUR_GMV_AS_REF_GMV * 2,
     THREAD_COMMUNICATION_FLAG_COUNT,
 } flags_t;
 
@@ -45,7 +49,7 @@ USBD_HandleTypeDef hUsbDeviceFS;
 extern USBD_DescriptorsTypeDef CDC_Desc;
 
 
-void timer_cb(void  * argument)
+static void timer_cb(void * argument)
 {
     APP_PRINTF("Stream stopped, total data = %d bytes", total_stream_data_size);
     total_stream_data_size = 0u;
@@ -54,7 +58,7 @@ void timer_cb(void  * argument)
 }
 
 
-void cdc_evt_handler(cdc_evt_params_t params)
+static void cdc_evt_handler(cdc_evt_params_t params)
 {
     uint8_t * p_rx = params.evt.new_data.p_data;
     uint8_t process_length = *params.evt.new_data.p_length;
@@ -95,16 +99,20 @@ void cdc_evt_handler(cdc_evt_params_t params)
                         osThreadFlagsSet(*p_cur_thread_id, THREAD_COMMUNICATION_FLAG_SET_MEAS);
                         break;
                     case COMMUNICATION_MSG_TYPE_USE_DEFAULT_REF_GMV:
-                        osThreadFlagsSet(*p_cur_thread_id, THREAD_COMMUNICATION_FLAG_USE_DEFAULT_REF_GMV);
+                        osThreadFlagsSet(
+                            *p_cur_thread_id, THREAD_COMMUNICATION_FLAG_USE_DEFAULT_REF_GMV);
                         break;
                     case COMMUNICATION_MSG_TYPE_USE_CALIB_REF_GMV:
-                        osThreadFlagsSet(*p_cur_thread_id, THREAD_COMMUNICATION_FLAG_USE_CALIB_REF_GMV);
+                        osThreadFlagsSet(
+                            *p_cur_thread_id, THREAD_COMMUNICATION_FLAG_USE_CALIB_REF_GMV);
                         break;
                     case COMMUNICATION_MSG_TYPE_USE_CUR_GMV_AS_REF_GMV:
-                        osThreadFlagsSet(*p_cur_thread_id, THREAD_COMMUNICATION_FLAG_USE_CUR_GMV_AS_REF_GMV);
+                        osThreadFlagsSet(
+                            *p_cur_thread_id, THREAD_COMMUNICATION_FLAG_USE_CUR_GMV_AS_REF_GMV);
                         break;
                     case COMMUNICATION_MSG_TYPE_STORE_CUR_GMV_AS_CALIB:
-                        osThreadFlagsSet(*p_cur_thread_id, THREAD_COMMUNICATION_FLAG_STORE_CUR_GMV_AS_CALIB);
+                        osThreadFlagsSet(
+                            *p_cur_thread_id, THREAD_COMMUNICATION_FLAG_STORE_CUR_GMV_AS_CALIB);
                         break;
                     default:
                         break;
@@ -123,7 +131,7 @@ void cdc_evt_handler(cdc_evt_params_t params)
 }
 
 
-ret_code_t usbd_init(void)
+static ret_code_t usbd_init(void)
 {
     USBD_register_clock_config_func(app_cpu_clock_config);
 
@@ -150,6 +158,72 @@ ret_code_t usbd_init(void)
 }
 
 
+static uint32_t get_bank(uint32_t Addr)
+{
+    uint32_t bank = 0;
+
+    if (READ_BIT(SYSCFG->MEMRMP, SYSCFG_MEMRMP_FB_MODE) == 0)
+    {
+        /* No Bank swap */
+        bank = (Addr < (FLASH_BASE + FLASH_BANK_SIZE)) ? FLASH_BANK_1 : FLASH_BANK_2;
+    } else {
+        /* Bank swap */
+        bank = (Addr < (FLASH_BASE + FLASH_BANK_SIZE)) ? FLASH_BANK_2 : FLASH_BANK_1;
+    }
+
+    return bank;
+}
+
+
+static int store_ref_gmv_on_flash(void)
+{
+    POINT_PRECISION * p_data;
+    uint32_t length;
+    uint32_t addr, addr_end;
+    uint32_t page_error;
+    FLASH_EraseInitTypeDef erase_init;
+    imfd_meas_type_t meas_type;
+
+    fft_sfm_get_ref_gmv(&p_data, &length);
+    fft_sfm_get_meas_type(&meas_type);
+
+    if (meas_type == IMFD_MEAS_SINGLE_CURRENT)
+    {
+        addr = 0x0807D000;
+    } else if (meas_type == IMFD_MEAS_VIB_AXIAL)
+    {
+        addr = 0x0807E000;
+    } else if (meas_type == IMFD_MEAS_VIB_RADIAL)
+    {
+        addr = 0x0807F000;
+    }
+    addr_end = addr + length;
+    HAL_FLASH_Unlock();
+    __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_OPTVERR);
+    erase_init.Banks = get_bank(addr);
+    erase_init.TypeErase = FLASH_TYPEERASE_MASSERASE;
+    if (HAL_FLASHEx_Erase(&erase_init, &page_error) != HAL_OK)
+    {
+        APP_PRINTF("Erase error, 0x%08X", page_error);
+        HAL_FLASH_Lock();
+        return -1;
+    }
+    while (addr_end > addr)
+    {
+        if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, addr, *p_data) != HAL_OK)
+        {
+            APP_PRINTF("FLASH program error, addr = %d", p_data);
+            HAL_FLASH_Lock();
+            return -1;
+        }
+        addr += sizeof(POINT_PRECISION);
+        p_data += 1;
+    }
+    HAL_FLASH_Lock();
+    return 0;
+}
+
+
 ret_code_t thread_communication_init(thread_communication_init_t * p_init)
 {
     p_queue_usb_rx = p_init->p_queue_msg_id;
@@ -172,12 +246,13 @@ ret_code_t thread_communication_run(void)
     app_queue_rx_msg_t msg;
     ret_code_t ret_code;
 
-    uint32_t flag =
-        osThreadFlagsWait(THREAD_COMMUNICATION_FLAG_MEAS | THREAD_COMMUNICATION_FLAG_SET_FREQ |
-                              THREAD_COMMUNICATION_FLAG_SET_MEAS | THREAD_COMMUNICATION_FLAG_USE_DEFAULT_REF_GMV |
-                              THREAD_COMMUNICATION_FLAG_USE_CALIB_REF_GMV | THREAD_COMMUNICATION_FLAG_USE_CUR_GMV_AS_REF_GMV |
-                              THREAD_COMMUNICATION_FLAG_STORE_CUR_GMV_AS_CALIB,
-            osFlagsWaitAny, osWaitForever);
+    uint32_t flag = osThreadFlagsWait(
+        THREAD_COMMUNICATION_FLAG_MEAS | THREAD_COMMUNICATION_FLAG_SET_FREQ |
+            THREAD_COMMUNICATION_FLAG_SET_MEAS | THREAD_COMMUNICATION_FLAG_USE_DEFAULT_REF_GMV |
+            THREAD_COMMUNICATION_FLAG_USE_CALIB_REF_GMV |
+            THREAD_COMMUNICATION_FLAG_USE_CUR_GMV_AS_REF_GMV |
+            THREAD_COMMUNICATION_FLAG_STORE_CUR_GMV_AS_CALIB,
+        osFlagsWaitAny, osWaitForever);
 
     if (flag >= osFlagsErrorISR)
     {
@@ -188,7 +263,7 @@ ret_code_t thread_communication_run(void)
     {
         osTimerStop(timer_handle);
         osTimerStart(timer_handle, 5000u);
-        //NOTE: just to notify this thread.
+        // NOTE: just to notify this thread.
     }
     if (flag == THREAD_COMMUNICATION_FLAG_SET_FREQ)
     {
@@ -248,27 +323,42 @@ ret_code_t thread_communication_run(void)
     }
     if (flag == THREAD_COMMUNICATION_FLAG_USE_CALIB_REF_GMV)
     {
-        fft_sfm_set_ref_gmv(IMFD_REF_GMV_LOAD_DEFAULT, NULL);
-        APP_PRINTF("Load calib GMV.");  //TODO:load GMV.
+        uint32_t addr;
+        imfd_meas_type_t meas_type;
+        fft_sfm_get_meas_type(&meas_type);
+        if (meas_type == IMFD_MEAS_SINGLE_CURRENT)
+        {
+            addr = 0x0807D000;
+        } else if (meas_type == IMFD_MEAS_VIB_AXIAL)
+        {
+            addr = 0x0807E000;
+        } else if (meas_type == IMFD_MEAS_VIB_RADIAL)
+        {
+            addr = 0x0807F000;
+        }
+        fft_sfm_set_ref_gmv(IMFD_REF_GMV_LOAD_FROM_POINTER, (POINT_PRECISION *)addr);
+        APP_PRINTF("Load calib GMV."); // TODO:load GMV.
     }
     if (flag == THREAD_COMMUNICATION_FLAG_USE_CUR_GMV_AS_REF_GMV)
     {
-        fft_sfm_set_ref_gmv(IMFD_REG_GMV_LOAD_FROM_CURRENT, NULL);
+        fft_sfm_set_ref_gmv(IMFD_REF_GMV_LOAD_FROM_CURRENT, NULL);
         APP_PRINTF("Set current GMV as reference.");
     }
     if (flag == THREAD_COMMUNICATION_FLAG_STORE_CUR_GMV_AS_CALIB)
     {
-        APP_PRINTF("Store current reference GMV to FLASH .");
+        store_ref_gmv_on_flash();
+        APP_PRINTF("Store current reference GMV to FLASH.");
     }
     return CODE_SUCCESS;
 }
 
 
-ret_code_t thread_communication_transmit(communication_ret_msg_type_t type, uint8_t * p_buf, uint16_t len)
+ret_code_t thread_communication_transmit(
+    communication_ret_msg_type_t type, uint8_t * p_buf, uint16_t len)
 {
     int8_t usbd_code;
 
-    if ((len+COMMUNICATION_HEADER_TOTAL_SIZE) > APP_USBD_TX_BUF_SIZE)
+    if ((len + COMMUNICATION_HEADER_TOTAL_SIZE) > APP_USBD_TX_BUF_SIZE)
     {
         return CODE_RESOURCES;
     }
@@ -278,7 +368,7 @@ ret_code_t thread_communication_transmit(communication_ret_msg_type_t type, uint
     ret_msg_buf[COMMUNICATION_HEADER_TYPE_IDX] = type;
     memcpy(ret_msg_buf + COMMUNICATION_HEADER_LEN_IDX, &len, sizeof(len));
     memcpy(ret_msg_buf + COMMUNICATION_HEADER_TOTAL_SIZE, p_buf, len);
-    usbd_code = CDC_Transmit_FS(ret_msg_buf, len+COMMUNICATION_HEADER_TOTAL_SIZE);
+    usbd_code = CDC_Transmit_FS(ret_msg_buf, len + COMMUNICATION_HEADER_TOTAL_SIZE);
     if (usbd_code != USBD_OK)
     {
         return CODE_BUSY;

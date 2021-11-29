@@ -290,6 +290,12 @@ void fft_sfm_set_meas_type(imfd_meas_type_t new_type)
 }
 
 
+void fft_sfm_get_meas_type(imfd_meas_type_t * p_meas_type)
+{
+    *p_meas_type = meas_type;
+}
+
+
 void fft_sfm_get_result(POINT_PRECISION ** p_slope, uint16_t * p_len)
 {
     *p_slope = poly_coefs;
@@ -364,7 +370,7 @@ void fft_sfm_set_ref_gmv(imfd_set_gmv_ref_op_type op_type, POINT_PRECISION * p_g
                 memcpy(gmv_ref[GMV_REF_2_VIB_IDX], default_gmv_ref[DEFAULT_REF_GMV2_VIB2_IDX], GMV_P * sizeof(POINT_PRECISION));
             }
             break;
-        case IMFD_REG_GMV_LOAD_FROM_POINTER:
+        case IMFD_REF_GMV_LOAD_FROM_POINTER:
             if (meas_type == IMFD_MEAS_SINGLE_CURRENT)
             {
                 memcpy(gmv_ref[GMV_REF_CURRENT_IDX], p_gmv_ref, GMV_P * sizeof(POINT_PRECISION));
@@ -374,7 +380,7 @@ void fft_sfm_set_ref_gmv(imfd_set_gmv_ref_op_type op_type, POINT_PRECISION * p_g
                 memcpy(gmv_ref[GMV_REF_2_VIB_IDX], p_gmv_ref + GMV_P, GMV_P * sizeof(POINT_PRECISION));
             }
             break;
-        case IMFD_REG_GMV_LOAD_FROM_CURRENT:
+        case IMFD_REF_GMV_LOAD_FROM_CURRENT:
             if (meas_type == IMFD_MEAS_SINGLE_CURRENT)
             {
                 memcpy(gmv_ref[GMV_REF_CURRENT_IDX], gmv_buf[GMV_INSTANT_CURRENT_IDX], GMV_P * sizeof(POINT_PRECISION));
@@ -393,4 +399,10 @@ void fft_sfm_set_ref_gmv(imfd_set_gmv_ref_op_type op_type, POINT_PRECISION * p_g
         default:
             break;
     }
+}
+
+void fft_sfm_get_ref_gmv(POINT_PRECISION ** p_ref_gmv, uint32_t * p_len)
+{
+    *p_ref_gmv = gmv_ref[0];
+    *p_len = sizeof(gmv_ref);
 }

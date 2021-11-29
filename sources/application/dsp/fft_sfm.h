@@ -49,7 +49,7 @@
   *
   */
 #ifndef IMFD_CONFIG_TIME_WINDOW_MS
-#define TIME_WINDOW_MS                    (500)
+#define TIME_WINDOW_MS                    (1000)
 #else
 #define FREQ_AFTER_DECIMATION_MS          (IMFD_CONFIG_FINAL_FREQ)
 #endif
@@ -224,8 +224,8 @@ typedef enum
 typedef enum
 {
     IMFD_REF_GMV_LOAD_DEFAULT,
-    IMFD_REG_GMV_LOAD_FROM_POINTER,
-    IMFD_REG_GMV_LOAD_FROM_CURRENT,
+    IMFD_REF_GMV_LOAD_FROM_POINTER,
+    IMFD_REF_GMV_LOAD_FROM_CURRENT,
 } imfd_set_gmv_ref_op_type;
 
 
@@ -297,12 +297,21 @@ void fft_sfm_set_ref_gmv(imfd_set_gmv_ref_op_type op_type, POINT_PRECISION * p_g
 
 
 /**
+  * @brief: Get pointer to current reference GMV.
+  * @params:  p_ref_gmv:  pointer to pointer, where will be stored pointer on current reference GMV buffer.
+  * @params:  p_len:  pointer where length of the reference GMV will be stored.
+  */
+void fft_sfm_get_ref_gmv(POINT_PRECISION ** p_ref_gmv, uint32_t * p_len);
+
+
+/**
   * @brief: Get FFT buffer.
   * @purpose: DEBUG ONLY
   * @params:  p_buf:  pointer to pointer on buffer with FFT spectrum.
   * @params:  p_len:  pointer where length of FFT buffer will loaded.
   */
 void fft_sfm_get_fft_buf(POINT_PRECISION ** p_buf, uint16_t * p_len);
+
 
 /**
   * @brief: Get GMV buffer.
