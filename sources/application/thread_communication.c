@@ -210,7 +210,9 @@ static int store_ref_gmv_on_flash(void)
     }
     while (addr_end > addr)
     {
-        if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, addr, *p_data) != HAL_OK)
+        uint64_t mem_data;
+        memcpy(&mem_data, p_data, sizeof(uint64_t));
+        if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, addr, mem_data) != HAL_OK)
         {
             APP_PRINTF("FLASH program error, addr = %d", p_data);
             HAL_FLASH_Lock();
