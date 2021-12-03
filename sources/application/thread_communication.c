@@ -119,10 +119,13 @@ static void cdc_evt_handler(cdc_evt_params_t params)
                 }
                 p_rx = p_rx + COMMUNICATION_HEADER_TOTAL_SIZE;
             }
-            app_queue_rx_msg_t msg;
-            memcpy(msg.data.buf, p_rx, process_length);
-            msg.length = process_length;
-            osMessageQueuePut(*p_queue_usb_rx, &msg, 0u, 0u);
+            if (process_length > 0u)
+            {
+                app_queue_rx_msg_t msg;
+                memcpy(msg.data.buf, p_rx, process_length);
+                msg.length = process_length;
+                osMessageQueuePut(*p_queue_usb_rx, &msg, 0u, 0u);
+            }
             break;
         }
         default:
@@ -189,13 +192,13 @@ static int store_ref_gmv_on_flash(void)
 
     if (meas_type == IMFD_MEAS_SINGLE_CURRENT)
     {
-        addr = 0x0807D000;
+        addr = APP_FLASH_ADDR_CALIB_REG_GMV_CURRENT;
     } else if (meas_type == IMFD_MEAS_VIB_AXIAL)
     {
-        addr = 0x0807E000;
+        addr = APP_FLASH_ADDR_CALIB_REG_GMV_VIB1;
     } else if (meas_type == IMFD_MEAS_VIB_RADIAL)
     {
-        addr = 0x0807F000;
+        addr = APP_FLASH_ADDR_CALIB_REG_GMV_VIB2;
     }
     addr_end = addr + length;
     HAL_FLASH_Unlock();
@@ -320,30 +323,17 @@ ret_code_t thread_communication_run(void)
     }
     if (flag == THREAD_COMMUNICATION_FLAG_USE_DEFAULT_REF_GMV)
     {
-        fft_sfm_set_ref_gmv(IMFD_REF_GMV_LOAD_DEFAULT, NULL);
+        fft_sfm_set_ref_gmv(IMFD_REF_GMV_LOAD_DEFAULT);
         APP_PRINTF("Load default GMV.");
     }
     if (flag == THREAD_COMMUNICATION_FLAG_USE_CALIB_REF_GMV)
     {
-        uint32_t addr;
-        imfd_meas_type_t meas_type;
-        fft_sfm_get_meas_type(&meas_type);
-        if (meas_type == IMFD_MEAS_SINGLE_CURRENT)
-        {
-            addr = 0x0807D000;
-        } else if (meas_type == IMFD_MEAS_VIB_AXIAL)
-        {
-            addr = 0x0807E000;
-        } else if (meas_type == IMFD_MEAS_VIB_RADIAL)
-        {
-            addr = 0x0807F000;
-        }
-        fft_sfm_set_ref_gmv(IMFD_REF_GMV_LOAD_FROM_POINTER, (POINT_PRECISION *)addr);
+        fft_sfm_set_ref_gmv(IMFD_REF_GMV_LOAD_CALIB);
         APP_PRINTF("Load calib GMV."); // TODO:load GMV.
     }
     if (flag == THREAD_COMMUNICATION_FLAG_USE_CUR_GMV_AS_REF_GMV)
     {
-        fft_sfm_set_ref_gmv(IMFD_REF_GMV_LOAD_FROM_CURRENT, NULL);
+        fft_sfm_set_ref_gmv(IMFD_REF_GMV_LOAD_FROM_CURRENT);
         APP_PRINTF("Set current GMV as reference.");
     }
     if (flag == THREAD_COMMUNICATION_FLAG_STORE_CUR_GMV_AS_CALIB)

@@ -17,6 +17,12 @@
 #define APP_QUEUE_RX_MSG_COUNT                    (256u)
 
 
+/* FLASH addresses with calibrations. */
+#define APP_FLASH_ADDR_CALIB_REG_GMV_CURRENT      (0x0807D000)
+#define APP_FLASH_ADDR_CALIB_REG_GMV_VIB1         (0x0807E000)
+#define APP_FLASH_ADDR_CALIB_REG_GMV_VIB2         (0x0807F000)
+
+
 typedef struct
 {
     union {

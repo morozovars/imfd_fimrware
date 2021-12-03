@@ -56,7 +56,14 @@ ret_code_t thread_dsp_init(thread_dsp_init_t * p_init)
 {
     p_new_data_queue = p_init->p_new_data_queue;
 
-    fft_sfm_init();
+    imfd_init_t fft_sfm_cfg = {
+        .addr_calb_ref_gmv_current = APP_FLASH_ADDR_CALIB_REG_GMV_CURRENT,
+        .addr_calb_ref_gmv1_vib1 = APP_FLASH_ADDR_CALIB_REG_GMV_VIB1,
+        .addr_calb_ref_gmv2_vib1 = APP_FLASH_ADDR_CALIB_REG_GMV_VIB1 + 1600,
+        .addr_calb_ref_gmv1_vib2 = APP_FLASH_ADDR_CALIB_REG_GMV_VIB2,
+        .addr_calb_ref_gmv2_vib2 = APP_FLASH_ADDR_CALIB_REG_GMV_VIB2 + 1600,
+    };
+    fft_sfm_init(&fft_sfm_cfg);
 
     return CODE_SUCCESS;
 }

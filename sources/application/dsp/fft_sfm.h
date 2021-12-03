@@ -224,19 +224,30 @@ typedef enum
 typedef enum
 {
     IMFD_REF_GMV_LOAD_DEFAULT,
-    IMFD_REF_GMV_LOAD_FROM_POINTER,
+    IMFD_REF_GMV_LOAD_CALIB,
     IMFD_REF_GMV_LOAD_FROM_CURRENT,
-} imfd_set_gmv_ref_op_type;
+} imfd_gmv_ref_source_t;
+
+
+typedef struct
+{
+    uint32_t  addr_calb_ref_gmv_current;
+    uint32_t  addr_calb_ref_gmv1_vib1;
+    uint32_t  addr_calb_ref_gmv2_vib1;
+    uint32_t  addr_calb_ref_gmv1_vib2;
+    uint32_t  addr_calb_ref_gmv2_vib2;
+} imfd_init_t;
 
 
 /**
   * @brief: Initialize FFT SFM algorithm module.
   * @note:  This function must be called before calling of the any other functions of this module.
+  * @param: p_init  structure with initialization data.
   * @return:  ret_code:
   *                       IMFD_OK - module successfully initialized.
   *                       IMFD_ERROR - error occured during allocation memory for FFT buffers.
   */
-imfd_ret_t fft_sfm_init(void);
+imfd_ret_t fft_sfm_init(imfd_init_t * p_init);
 
 
 /**
@@ -285,15 +296,14 @@ void fft_sfm_get_meas_type(imfd_meas_type_t * p_meas_type);
 
 /**
   * @brief: Set reference GMV. Action depends on op_type
-  * @params:  op_type:  operation type:
+  * @params:  source:  operation type:
   *                     IMFD_REF_GMV_LOAD_DEFAULT - load default reference GMV (see gmv_default.h).
-  *                     IMFD_REG_GMV_LOAD_FROM_POINTER - load data passes from p_gmv_ref will loaded 
-  *                                                      as reference GMV.
+  *                     IMFD_REG_GMV_LOAD_CALIB - load calib reference GMV.
   *                     IMFD_REG_GMV_LOAD_FROM_CURRENT - current values of the instant GMV will loaded
   *                                                      as reference GMV.
   * @params:  p_gmv_ref:  pointer to reference GMV, which will be used only if op_type == IMFD_REG_GMV_LOAD_FROM_POINTER.
   */
-void fft_sfm_set_ref_gmv(imfd_set_gmv_ref_op_type op_type, POINT_PRECISION * p_gmv_ref);
+void fft_sfm_set_ref_gmv(imfd_gmv_ref_source_t source);
 
 
 /**
