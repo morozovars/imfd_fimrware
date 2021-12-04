@@ -9,6 +9,7 @@
 #include "dma_port_template.h"
 #endif
 
+
 /**
  * @brief Common configuration
  *        parameters for DMA channel
@@ -23,8 +24,14 @@ typedef struct
                                      address enable/disable */
   dma_mem_incr_t mem_incr; /*< Automatic increment of 
                                memory address enable/disable */
-
+  dma_request_t request;  /*< Specifies the request selected for 
+                              the specified channel*/
+  dma_malign_t   m_data_align; /*< Determine peripherial data
+                                  aligh size*/
+  dma_palign_t   p_data_align; /*< Determine memory data
+                                  align size */
 } dma_cfg_t;
+
 
 /**
  * @typedef Type of callback function
@@ -79,5 +86,6 @@ dma_ret_code_t dma_register_callback(const dma_inst_t inst, const dma_channel_t 
  * @return  Casted to (void*) channel object 
  */
 void* dma_get_channel_for_link(const dma_inst_t inst, const dma_channel_t ch);
+
 
 #endif // ! DMA_H_

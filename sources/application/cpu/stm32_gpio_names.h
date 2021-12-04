@@ -5,38 +5,6 @@
 /* Includes. */
 #include "stm32g4xx_hal.h"
 
-/**
-  * @brief   GPIO names with respect to names of pins on schematic.
-  */
-
-#define CS_Test_Pin GPIO_PIN_0
-#define CS_Test_GPIO_Port GPIOB
-#define ADC_CS_Pin GPIO_PIN_2
-#define ADC_CS_GPIO_Port GPIOA
-#define ADC_CS1_Pin GPIO_PIN_4
-#define ADC_CS1_GPIO_Port GPIOA
-#define ADC_sync1_Pin GPIO_PIN_4
-#define ADC_sync1_GPIO_Port GPIOC
-#define ADC_PSW1_Pin GPIO_PIN_5
-#define ADC_PSW1_GPIO_Port GPIOC
-#define ADC_PSW_Pin GPIO_PIN_11
-#define ADC_PSW_GPIO_Port GPIOB
-#define Driver_Fault_Pin GPIO_PIN_9
-#define Driver_Fault_GPIO_Port GPIOA
-#define Driver_OTW_Pin GPIO_PIN_10
-#define Driver_OTW_GPIO_Port GPIOA
-#define Driver_OTW_EXTI_IRQn EXTI15_10_IRQn
-#define Driver_reset_AB_Pin GPIO_PIN_11
-#define Driver_reset_AB_GPIO_Port GPIOA
-#define Driver_reset_CD_Pin GPIO_PIN_12
-#define Driver_reset_CD_GPIO_Port GPIOA
-#define T_SWDIO_Pin GPIO_PIN_13
-#define T_SWDIO_GPIO_Port GPIOA
-#define T_SWCLK_Pin GPIO_PIN_14
-#define T_SWCLK_GPIO_Port GPIOA
-#define T_SWO_Pin GPIO_PIN_3
-#define T_SWO_GPIO_Port GPIOB
-
 
 /* GPIO Types. */
 /**
@@ -130,22 +98,22 @@ typedef enum
     PE14  = 0x4E,
     PE15  = 0x4F,
     //GPIOF
-    PF0   = 0x40,
-    PF1   = 0x41,
-    PF2   = 0x42,
-    PF3   = 0x43,
-    PF4   = 0x44,
-    PF5   = 0x45,
-    PF6   = 0x46,
-    PF7   = 0x47,
-    PF8   = 0x48,
-    PF9   = 0x49,
-    PF10  = 0x4A,
-    PF11  = 0x4B,
-    PF12  = 0x4C,
-    PF13  = 0x4D,
-    PF14  = 0x4E,
-    PF15  = 0x4F,
+    PF0   = 0x50,
+    PF1   = 0x51,
+    PF2   = 0x52,
+    PF3   = 0x53,
+    PF4   = 0x54,
+    PF5   = 0x55,
+    PF6   = 0x56,
+    PF7   = 0x57,
+    PF8   = 0x58,
+    PF9   = 0x59,
+    PF10  = 0x5A,
+    PF11  = 0x5B,
+    PF12  = 0x5C,
+    PF13  = 0x5D,
+    PF14  = 0x5E,
+    PF15  = 0x5F,
 } gpio_pins_t;
 
 

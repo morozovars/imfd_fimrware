@@ -1,6 +1,5 @@
-#ifndef SPI_STM32G4_H_
-#define SPI_STM32G4_H_
-
+#ifndef DMA_STM32G4_H_
+#define DMA_STM32G4_H_
 #ifdef __STM32G474_SUBFAMILY 
   #include "g474_subfamily/dma_stm32g474.h"
 #else

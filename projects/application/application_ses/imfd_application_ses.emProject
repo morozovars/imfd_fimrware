@@ -57,7 +57,7 @@
       arm_assembler_variant="gcc"
       arm_compiler_variant="gcc"
       build_treat_warnings_as_errors="No"
-      c_preprocessor_definitions="DEBUG;TRACE_RTOS;USE_FULL_ASSERT"
+      c_preprocessor_definitions="DEBUG;TRACE_RTOS;USE_FULL_ASSERT;DEBUGOUT_INTERFACE = UART"
       debug_leave_target_running="Yes"
       debug_target_connection="GDB Server"
       gcc_c_language_standard="c17"
@@ -75,12 +75,14 @@
       <folder Name="trace">
         <file file_name="../../../sources/application/trace/err_handler.c" />
         <file file_name="../../../sources/application/trace/dbgout.h" />
+        <file file_name="../../../sources/application/trace/dbgout.c" />
       </folder>
       <file file_name="../../../sources/application/app_os.c" />
       <folder Name="cpu">
         <file file_name="../../../sources/application/cpu/gpio.c" />
         <file file_name="../../../sources/application/cpu/core_it.c" />
         <file file_name="../../../sources/application/trace/app_trace.c" />
+        <file file_name="../../../sources/application/cpu/uart.c" />
       </folder>
       <file file_name="../../../sources/application/app_os.h" />
       <file file_name="../../../sources/application/app_initializer.c" />

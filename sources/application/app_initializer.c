@@ -96,6 +96,11 @@ ret_code_t app_init(void)
     {
         return err_code;
     }
+    err_code = dbg_init();
+    if (is_err(err_code))
+    {
+        return err_code;
+    }
     dbg_printf("<App Init> Initialization successfull\n");
 
     dbg_printf("<App Init> PCLK1 freq = %d Hz\n", HAL_RCC_GetPCLK1Freq());
