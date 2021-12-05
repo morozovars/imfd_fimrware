@@ -13,11 +13,12 @@ void dbg_printf_uart(const char *__format, ...);
 
 #include <stdio.h>
 
-#if DEBUGOUT_INTERFACE == UART
-#define dbg_printf(fmt,args...)	dbg_printf_uart(fmt,##args)
-#elif  DEBUGOUT_INTERFACE == RTT
+#if DEBUGOUT_2ND_INTERFACE == UART
+#define dbg_printf(fmt,args...)     dbg_printf_uart(fmt,##args);          \
+                                    printf(fmt,##args)
+#else
 #define dbg_printf(fmt,args...)	printf(fmt,##args)
-#endif // DEBUGOUT_INTERFACE
+#endif // DEBUGOUT_2ND_INTERFACE
 #else
 
 #define dbg_printf(fmt,args...)

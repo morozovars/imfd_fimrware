@@ -57,7 +57,7 @@
       arm_assembler_variant="gcc"
       arm_compiler_variant="gcc"
       build_treat_warnings_as_errors="No"
-      c_preprocessor_definitions="DEBUG;TRACE_RTOS;USE_FULL_ASSERT;DEBUGOUT_INTERFACE = UART"
+      c_preprocessor_definitions="DEBUG;TRACE_RTOS;USE_FULL_ASSERT;DEBUGOUT_2ND_INTERFACE = UART"
       debug_leave_target_running="Yes"
       debug_target_connection="GDB Server"
       gcc_c_language_standard="c17"
