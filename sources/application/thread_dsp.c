@@ -57,7 +57,8 @@ ret_code_t thread_dsp_init(thread_dsp_init_t * p_init)
     p_new_data_queue = p_init->p_new_data_queue;
 
     imfd_init_t fft_sfm_cfg = {
-        .addr_calb_ref_gmv_current = APP_FLASH_ADDR_CALIB_REG_GMV_CURRENT,
+        .addr_calb_ref_gmv1_current = APP_FLASH_ADDR_CALIB_REG_GMV_CURRENT,
+        .addr_calb_ref_gmv2_current = APP_FLASH_ADDR_CALIB_REG_GMV_CURRENT + 1600,
         .addr_calb_ref_gmv1_vib1 = APP_FLASH_ADDR_CALIB_REG_GMV_VIB1,
         .addr_calb_ref_gmv2_vib1 = APP_FLASH_ADDR_CALIB_REG_GMV_VIB1 + 1600,
         .addr_calb_ref_gmv1_vib2 = APP_FLASH_ADDR_CALIB_REG_GMV_VIB2,

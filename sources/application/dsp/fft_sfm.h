@@ -195,7 +195,9 @@ enum
 {
     IFR1_CUR_FREQ1 = 25u,
     IFR1_CUR_FREQ2 = 125u,
-    IFR_CUR_COUNT = 1u,
+    IFR2_CUR_FREQ1 = 25u,
+    IFR2_CUR_FREQ2 = 125u,
+    IFR_CUR_COUNT = 2u,
 
     IFR1_VIB_FREQ1 = 0u,
     IFR1_VIB_FREQ2 = 70u,
@@ -231,7 +233,8 @@ typedef enum
 
 typedef struct
 {
-    uint32_t  addr_calb_ref_gmv_current;
+    uint32_t  addr_calb_ref_gmv1_current;
+    uint32_t  addr_calb_ref_gmv2_current;
     uint32_t  addr_calb_ref_gmv1_vib1;
     uint32_t  addr_calb_ref_gmv2_vib1;
     uint32_t  addr_calb_ref_gmv1_vib2;

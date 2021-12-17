@@ -59,7 +59,7 @@ void dbg_printf_uart(const char *__format, ...)
 {
     va_list arg;
 
-    memcpy(tx_buffer, 0, BOARD_DBGOUT_BUFFER_SIZE);
+    memset(tx_buffer, 0, BOARD_DBGOUT_BUFFER_SIZE);
 
     va_start (arg, __format);
     vsnprintf ((char *)tx_buffer,BOARD_DBGOUT_BUFFER_SIZE-1, __format, arg);

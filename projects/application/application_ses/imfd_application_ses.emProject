@@ -2,6 +2,8 @@
 <solution Name="imfd_application" target="8" version="2">
   <project Name="imfd_application">
     <configuration
+      CMSIS_CORE="Yes"
+      CMSIS_DSP="Cortex-M4 Big Endian With FPU"
       LIBRARY_IO_TYPE="RTT"
       Name="Common"
       arm_architecture="v7EM"
