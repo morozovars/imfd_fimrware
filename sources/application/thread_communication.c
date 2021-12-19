@@ -7,6 +7,7 @@
 #include "usbd_cdc_if.h"
 #include "usbd_core.h"
 #include "usbd_desc.h"
+#include <inttypes.h>
 
 #include "trace/dbgout.h"
 
@@ -14,6 +15,7 @@
 
 
 #define APP_PRINTF(...)                                                                            \
+    dbg_printf("(%d) ", osKernelGetTickCount());                                                   \
     dbg_printf("<USBD> ");                                                                         \
     dbg_printf(__VA_ARGS__);                                                                       \
     dbg_printf("\n");
@@ -40,7 +42,7 @@ static uint32_t wakeup_flags;
 static osThreadId_t * p_cur_thread_id;
 static void (*p_stop_stream_cb)(void);
 static bool is_meas_buf = false;
-static uint32_t total_stream_data_size = 0u;
+static uint64_t total_stream_data_size = 0u;
 static osTimerId_t timer_handle;
 static uint8_t ret_msg_buf[APP_USBD_TX_BUF_SIZE];
 
@@ -51,7 +53,7 @@ extern USBD_DescriptorsTypeDef CDC_Desc;
 
 static void timer_cb(void * argument)
 {
-    APP_PRINTF("Stream stopped, total data = %d bytes", total_stream_data_size);
+    APP_PRINTF("Stream stopped, total data = %"PRIu64 " bytes", total_stream_data_size);
     total_stream_data_size = 0u;
     p_stop_stream_cb();
     (void)argument;
@@ -122,7 +124,7 @@ static void cdc_evt_handler(cdc_evt_params_t params)
             if (process_length > 0u)
             {
                 app_queue_rx_msg_t msg;
-                memcpy(msg.data.buf, p_rx, process_length);
+                memcpy(msg.buf, p_rx, process_length);
                 msg.length = process_length;
                 osMessageQueuePut(*p_queue_usb_rx, &msg, 0u, 0u);
             }
@@ -284,7 +286,7 @@ ret_code_t thread_communication_run(void)
             return CODE_ERROR;
         }
         uint32_t sample_freq;
-        memcpy(&sample_freq, msg.data.buf, sizeof(sample_freq));
+        memcpy(&sample_freq, msg.buf, sizeof(sample_freq));
         APP_PRINTF("Update Fs, new Fs = %d", sample_freq);
         fft_sfm_set_fs(sample_freq);
     }
@@ -301,7 +303,7 @@ ret_code_t thread_communication_run(void)
             APP_PRINTF("Set meas, length = %d", msg.length);
             return CODE_ERROR;
         }
-        uint8_t meas_type = msg.data.buf[0];
+        uint8_t meas_type = msg.buf[0];
         switch (meas_type)
         {
             case COMMUNICATION_MEAS_TYPE_CURRENT:

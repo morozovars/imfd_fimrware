@@ -109,23 +109,23 @@ static void threads_init(void)
 
     attr.name = "blinky";
     attr.priority = osPriorityLow;
-    attr.stack_size = 512; // Stack size should be therefore 4 byte aligned in order to avoid division caused side effects.
+    attr.stack_size = 256; // Stack size should be therefore 4 byte aligned in order to avoid division caused side effects.
     thread_ids[THREAD_BLINKY] = osThreadNew(blinky_thread, NULL, &attr);
 
     attr.name = "dsp";
     attr.priority = osPriorityAboveNormal;
-    attr.stack_size = 4096;
+    attr.stack_size = 2048;
     thread_ids[THREAD_DSP] = osThreadNew(dsp_thread, NULL, &attr);
 
     attr.name = "communication";
     attr.priority = osPriorityAboveNormal;
-    attr.stack_size = 2048;
+    attr.stack_size = 1024;
     thread_ids[THREAD_COMMUNICATION] = osThreadNew(communication_thread, NULL, &attr);
 
 
     attr.name = "trace";
     attr.priority = osPriorityHigh;
-    attr.stack_size = 1024;
+    attr.stack_size = 768;
     thread_ids[THREAD_RTOS_TRACE] = osThreadNew(rtos_trace_thread, NULL, &attr);
 }
 

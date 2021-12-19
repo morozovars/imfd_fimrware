@@ -8,6 +8,7 @@
 
 
 #define APP_PRINTF(...)                                                                            \
+    dbg_printf("(%d) ", osKernelGetTickCount());                                                   \
     dbg_printf("<DSP> ");                                                                          \
     dbg_printf(__VA_ARGS__);                                                                       \
     dbg_printf("\n");
@@ -15,6 +16,7 @@
 
 osMessageQueueId_t * p_new_data_queue;
 static uint32_t total_meas_count = 0;
+static uint32_t total_stream_data_size2 = 0;
 
 
 static void process_measurements(uint8_t * p_buf, uint32_t length)
@@ -32,7 +34,7 @@ static void process_measurements(uint8_t * p_buf, uint32_t length)
     {
         /// Apply signal processing algorithms.
         imfd_meas_t meas;
-        memcpy(meas.data.raw, &p_cur_meas[i], THREAD_MEAS_SIZE);
+        meas.data.raw[0] = (POINT_PRECISION)(*p_cur_meas);
         ret_code = fft_sfm_singal_processing(meas);
         if (ret_code == IMFD_DRDY)
         {
@@ -65,6 +67,7 @@ ret_code_t thread_dsp_init(thread_dsp_init_t * p_init)
         .addr_calb_ref_gmv2_vib2 = APP_FLASH_ADDR_CALIB_REG_GMV_VIB2 + 1600,
     };
     fft_sfm_init(&fft_sfm_cfg);
+    total_stream_data_size2 = 0;
 
     return CODE_SUCCESS;
 }
@@ -92,7 +95,8 @@ ret_code_t thread_dsp_run(void)
         }
 
         // TODO: check length?
-        process_measurements(meas.data.buf, meas.length);
+        process_measurements(meas.buf, meas.length);
+        total_stream_data_size2 += meas.length;
     }
 
     return ret_code;
@@ -101,5 +105,7 @@ ret_code_t thread_dsp_run(void)
 void thread_dsp_stop_meas_stream_cb(void)
 {
     APP_PRINTF("Total stream meas count = %d", total_meas_count);
+    APP_PRINTF("Total stream data 2 count = %d", total_stream_data_size2);
     total_meas_count = 0;
+    total_stream_data_size2 = 0;
 }

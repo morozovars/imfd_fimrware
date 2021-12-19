@@ -6,11 +6,21 @@
 #include "gmv_default.h"
 #include <math.h>
 
+#include "trace/dbgout.h"
+
+
+#define APP_PRINTF(...)                                                                            \
+    dbg_printf("(%d) ", osKernelGetTickCount());                                                   \
+    dbg_printf("<FFT_SFM> ");                                                                      \
+    dbg_printf(__VA_ARGS__);                                                                       \
+    dbg_printf("\n");
+
+
 
 /**@brief: Macro for calculation of the index of the _freq in FFT specturum.
   *
   */
-#define IFR_IND(_freq)    _freq * (FREQ_AFTER_DECIMATION_HZ / TIME_WINDOW_MEAS_COUNT)
+#define IFR_IND(_freq)    _freq * (FREQ_AFTER_DECIMATION_HZ / (1000))
 
 
 /**@brief: Indexes in IFR arrays.
@@ -106,8 +116,8 @@ static const uint16_t ifr_length[IFR_TOTAL_COUNT] = {
 static POINT_PRECISION gmv_buf[GMV_INSTANT_COUNT][GMV_P];
 static POINT_PRECISION gmv_ref[GMV_REF_TOTAL_COUNT][GMV_P];
 static const POINT_PRECISION default_gmv_ref[DEFAULT_REF_GMV_TOTAL_COUNT][GMV_P] = {
-    [DEFAULT_REF_GMV_CURRENT1_IDX] = DEFAULT_GMV_CURRENT1,
-    [DEFAULT_REF_GMV_CURRENT2_IDX] = DEFAULT_GMV_CURRENT2,
+    [DEFAULT_REF_GMV_CURRENT1_IDX] = DEFAULT_GMV1_CURRENT,
+    [DEFAULT_REF_GMV_CURRENT2_IDX] = DEFAULT_GMV2_CURRENT,
     [DEFAULT_REF_GMV1_VIB1_IDX] = DEFAULT_GMV1_VIB1,
     [DEFAULT_REF_GMV2_VIB1_IDX] = DEFAULT_GMV2_VIB1,
     [DEFAULT_REF_GMV1_VIB2_IDX] = DEFAULT_GMV1_VIB2,
@@ -116,7 +126,7 @@ static const POINT_PRECISION default_gmv_ref[DEFAULT_REF_GMV_TOTAL_COUNT][GMV_P]
 static POINT_PRECISION poly_coefs[2];
 static calib_ref_gmv_addr_t addr_calib_ref_gmv;
 static imfd_gmv_ref_source_t gmv_ref_source = IMFD_REF_GMV_LOAD_DEFAULT;
-
+static POINT_PRECISION moment_order[GMV_P];
 
 static imfd_ret_t decimation(imfd_meas_t meas)
 {
@@ -208,18 +218,16 @@ static POINT_PRECISION max_array(POINT_PRECISION * p_src, uint32_t src_length)
 static void sfm_gmv(POINT_PRECISION * p_src, POINT_PRECISION * p_dst, uint32_t src_length)
 {
     POINT_PRECISION max_val = max_array(p_src, src_length);
-    POINT_PRECISION moment_order[GMV_P];
     for (uint32_t i = 0; i < src_length; i++)
     {
-        cmplx_fft_result[0][i] = p_src[i] / max_val;
+        cmplx_fft_result[i][0] = p_src[i] / max_val;
     }
     for (uint32_t i = 0; i < GMV_P; i++)
     {
-        moment_order[i] = exp(GMV_MIN_ORDER + i * ((GMV_MAX_ORDER - GMV_MIN_ORDER) / GMV_P));
         POINT_PRECISION sum = 0;
         for (uint32_t j = 0; j < src_length; j++)
         {
-            sum += pow(cmplx_fft_result[0][j], moment_order[i]) / src_length;
+            sum += pow(cmplx_fft_result[j][0], moment_order[i]) / src_length;
         }
         p_dst[i] = pow(sum, (1/moment_order[i]));
         p_dst[i] = p_dst[i] * max_val;
@@ -257,6 +265,11 @@ imfd_ret_t fft_sfm_init(imfd_init_t * p_init)
     addr_calib_ref_gmv.vib2_1 = p_init->addr_calb_ref_gmv1_vib2;
     addr_calib_ref_gmv.vib2_2 = p_init->addr_calb_ref_gmv2_vib2;
 
+    for (uint32_t i = 0; i < GMV_P; i++)
+    {
+        moment_order[i] = exp(GMV_MIN_ORDER + i * ((GMV_MAX_ORDER - GMV_MIN_ORDER) / GMV_P));
+    }
+
     return IMFD_OK;
 }
 
@@ -283,8 +296,8 @@ imfd_ret_t fft_sfm_singal_processing(imfd_meas_t meas)
     /// Calculate rFFT.
     arm_rfft_fast_f64(&m_rfft, decimated_measurement[0].data.raw, cmplx_fft_result[0], 0u);
     cmplx_mag(cmplx_fft_result[0], decimated_measurement[0].data.raw, TIME_WINDOW_MEAS_COUNT);
-
-    // caclulate GMVs.
+    
+    /// Caclulate GMVs.
     if (meas_type == IMFD_MEAS_SINGLE_CURRENT)
     {
         sfm_gmv((POINT_PRECISION *)p_ifr[IFR_CURRENT1_IDX], gmv_buf[GMV_INSTANT_CURRENT1_IDX], ifr_length[IFR_CURRENT1_IDX]);
@@ -296,15 +309,15 @@ imfd_ret_t fft_sfm_singal_processing(imfd_meas_t meas)
     }
 
     /// Calculate slopes.
-    if (meas_type == IMFD_MEAS_SINGLE_CURRENT)
-    {
-        polyfit(gmv_ref[GMV_REF_CURRENT1_IDX], gmv_buf[GMV_INSTANT_CURRENT1_IDX], GMV_P, 1, poly_coefs);
-        polyfit(gmv_ref[GMV_REF_CURRENT2_IDX], gmv_buf[GMV_INSTANT_CURRENT2_IDX], GMV_P, 1, &poly_coefs[1]);
-    } else if ((meas_type == IMFD_MEAS_VIB_AXIAL) || (meas_type == IMFD_MEAS_VIB_RADIAL))
-    {
-        polyfit(gmv_ref[GMV_REF_1_VIB_IDX], gmv_buf[GMV_INSTANT_IFR1_VIB_IDX], GMV_P, 1, poly_coefs);
-        polyfit(gmv_ref[GMV_REF_2_VIB_IDX], gmv_buf[GMV_INSTANT_IFR2_VIB_IDX], GMV_P, 1, &poly_coefs[1]);
-    }
+    //if (meas_type == IMFD_MEAS_SINGLE_CURRENT)
+    //{
+    //    polyfit(gmv_ref[GMV_REF_CURRENT1_IDX], gmv_buf[GMV_INSTANT_CURRENT1_IDX], GMV_P, 1, poly_coefs);
+    //    polyfit(gmv_ref[GMV_REF_CURRENT2_IDX], gmv_buf[GMV_INSTANT_CURRENT2_IDX], GMV_P, 1, &poly_coefs[1]);
+    //} else if ((meas_type == IMFD_MEAS_VIB_AXIAL) || (meas_type == IMFD_MEAS_VIB_RADIAL))
+    //{
+    //    polyfit(gmv_ref[GMV_REF_1_VIB_IDX], gmv_buf[GMV_INSTANT_IFR1_VIB_IDX], GMV_P, 1, poly_coefs);
+    //    polyfit(gmv_ref[GMV_REF_2_VIB_IDX], gmv_buf[GMV_INSTANT_IFR2_VIB_IDX], GMV_P, 1, &poly_coefs[1]);
+    //}
 
     return IMFD_DRDY;
 }

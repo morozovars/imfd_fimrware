@@ -129,6 +129,7 @@
       <file file_name="../../../sources/application/dsp/polyfit.c" />
       <file file_name="../../../sources/application/dsp/polyfit.h" />
       <file file_name="../../../sources/application/dsp/gmv_default.h" />
+      <file file_name="../../../sources/application/dsp/fft_sfm_config.h" />
     </folder>
   </project>
   <configuration

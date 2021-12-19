@@ -3,6 +3,7 @@
 
 
 #include <stdint.h>
+#include "fft_sfm_config.h"
 
 
 /**@brief FFT_SFM: Precision of the fractional values: double or float. @ref fft_sfm_config
@@ -11,7 +12,7 @@
 #ifndef IMFD_CONFIG_POINT_PRECISION 
 #define POINT_PRECISION                   double
 #else 
-#define POINT_PRECISION                   (IMFD_CONFIG_POINT_PRECISION)
+#define POINT_PRECISION                   IMFD_CONFIG_POINT_PRECISION
 #endif // IMFD_CONFIG_POINT_PRECISION
 
 
@@ -31,7 +32,7 @@
 #ifndef IMFD_CONFIG_MEAS_STRUCT_ALIGN  
 #define MEAS_STRUCT_ALIGN                 
 #else
-#define MEAS_STRUCT_ALIGN                 (IMFD_CONFIG_MEAS_STRUCT_ALIGN)
+#define MEAS_STRUCT_ALIGN                 IMFD_CONFIG_MEAS_STRUCT_ALIGN
 #endif // IMFD_CONFIG_MEAS_STRUCT_ALIGN
 
 
@@ -41,7 +42,7 @@
 #ifndef IMFD_CONFIG_FINAL_FREQ_HZ
 #define FREQ_AFTER_DECIMATION_HZ          (1000)
 #else
-#define FREQ_AFTER_DECIMATION_HZ          (IMFD_CONFIG_FINAL_FREQ)
+#define FREQ_AFTER_DECIMATION_HZ          IMFD_CONFIG_FINAL_FREQ_HZ
 #endif
 
 
@@ -88,7 +89,7 @@
   *
   */
 #ifndef IMFD_CONFIG_GMV_RESOLUTION
-#define GMV_P                             (100u)
+#define GMV_P                             (75u)
 #else
 #define GMV_P                             (IMFD_CONFIG_GMV_RESOLUTION)
 #endif
@@ -193,10 +194,10 @@ typedef struct MEAS_STRUCT_ALIGN
   */
 enum
 {
-    IFR1_CUR_FREQ1 = 25u,
-    IFR1_CUR_FREQ2 = 125u,
-    IFR2_CUR_FREQ1 = 25u,
-    IFR2_CUR_FREQ2 = 125u,
+    IFR1_CUR_FREQ1 = 30u,
+    IFR1_CUR_FREQ2 = 70u,
+    IFR2_CUR_FREQ1 = 0u,
+    IFR2_CUR_FREQ2 = 500u,
     IFR_CUR_COUNT = 2u,
 
     IFR1_VIB_FREQ1 = 0u,
