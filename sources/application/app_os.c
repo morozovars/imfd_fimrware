@@ -122,7 +122,6 @@ static void threads_init(void)
     attr.stack_size = 1024;
     thread_ids[THREAD_COMMUNICATION] = osThreadNew(communication_thread, NULL, &attr);
 
-
     attr.name = "trace";
     attr.priority = osPriorityHigh;
     attr.stack_size = 768;

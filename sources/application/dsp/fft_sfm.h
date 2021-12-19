@@ -52,7 +52,7 @@
 #ifndef IMFD_CONFIG_TIME_WINDOW_MS
 #define TIME_WINDOW_MS                    (1000)
 #else
-#define FREQ_AFTER_DECIMATION_MS          (IMFD_CONFIG_FINAL_FREQ)
+#define TIME_WINDOW_MS                    (IMFD_CONFIG_TIME_WINDOW_MS)
 #endif
 
 
@@ -200,10 +200,10 @@ enum
     IFR2_CUR_FREQ2 = 500u,
     IFR_CUR_COUNT = 2u,
 
-    IFR1_VIB_FREQ1 = 0u,
-    IFR1_VIB_FREQ2 = 70u,
-    IFR2_VIB_FREQ1 = 320u,
-    IFR2_VIB_FREQ2 = 400u,
+    IFR1_VIB_FREQ1 = 25u,
+    IFR1_VIB_FREQ2 = 125u,
+    IFR2_VIB_FREQ1 = 125u,
+    IFR2_VIB_FREQ2 = 225u,
     IFR_VIB_COUNT = 2u,
 
     IFR_MAX_COUNT = IFR_VIB_COUNT,
@@ -333,6 +333,12 @@ void fft_sfm_get_fft_buf(POINT_PRECISION ** p_buf, uint16_t * p_len);
   * @params:  p_buf:  pointer to pointer on buffer with GMV spectrum.
   */
 void fft_sfm_get_gmv_buf(POINT_PRECISION ** p_buf);
+
+
+/**
+  * @brief:   Reset buffer indexes.
+  */
+void fft_sfm_reset(void);
 
 
 #endif // FFT_SFM_H_

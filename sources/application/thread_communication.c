@@ -195,10 +195,10 @@ static int store_ref_gmv_on_flash(void)
     if (meas_type == IMFD_MEAS_SINGLE_CURRENT)
     {
         addr = APP_FLASH_ADDR_CALIB_REG_GMV_CURRENT;
-    } else if (meas_type == IMFD_MEAS_VIB_AXIAL)
+    } else if (meas_type == IMFD_MEAS_VIB_RADIAL)
     {
         addr = APP_FLASH_ADDR_CALIB_REG_GMV_VIB1;
-    } else if (meas_type == IMFD_MEAS_VIB_RADIAL)
+    } else if (meas_type == IMFD_MEAS_VIB_AXIAL)
     {
         addr = APP_FLASH_ADDR_CALIB_REG_GMV_VIB2;
     }
@@ -310,13 +310,13 @@ ret_code_t thread_communication_run(void)
                 APP_PRINTF("Set meas, new type - Current");
                 fft_sfm_set_meas_type(IMFD_MEAS_SINGLE_CURRENT);
                 break;
-            case COMMUNICATION_MEAS_TYPE_VIB_AXIAL:
-                APP_PRINTF("Set meas, new type - Vibration Axial");
-                fft_sfm_set_meas_type(IMFD_MEAS_VIB_AXIAL);
-                break;
             case COMMUNICATION_MEAS_TYPE_VIB_VERTICAL:
                 APP_PRINTF("Set meas, new type - Vibration Vertical");
                 fft_sfm_set_meas_type(IMFD_MEAS_VIB_RADIAL);
+                break;
+            case COMMUNICATION_MEAS_TYPE_VIB_AXIAL:
+                APP_PRINTF("Set meas, new type - Vibration Axial");
+                fft_sfm_set_meas_type(IMFD_MEAS_VIB_AXIAL);
                 break;
             default:
                 APP_PRINTF("Set meas, received unknown type. Ignored.");

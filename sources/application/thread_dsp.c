@@ -108,4 +108,5 @@ void thread_dsp_stop_meas_stream_cb(void)
     APP_PRINTF("Total stream data 2 count = %d", total_stream_data_size2);
     total_meas_count = 0;
     total_stream_data_size2 = 0;
+    fft_sfm_reset();
 }
