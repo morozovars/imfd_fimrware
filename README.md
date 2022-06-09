@@ -1,4 +1,18 @@
-# Induction Motors Fault Detection Firmware
+# Induction Motors Fault Detection Firmware Prototype
+
+###	Getting started
+TODO: how to install, what to install (versions), load submodules, LabVIEW soft
+required software and hardware
+
+###	System arcitecture
+TODO: describe threads and what is going on
+What used: FreeRTOS, etc...
+
+###	Algorithm description
+TODO: add documentation...
+
+###	How to debug system
+TODO: describe system possible debugs
 
 ###	Repo structure
 
