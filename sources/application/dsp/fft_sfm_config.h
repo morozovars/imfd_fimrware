@@ -27,7 +27,7 @@
 /**@brief FFT_SFM: Time-window in milliseconds @ref fft_sfm_config
   *
   */
-#define IMFD_CONFIG_TIME_WINDOW_MS              1000
+#define IMFD_CONFIG_TIME_WINDOW_MS              500
 
 /**@brief FFT_SFM: Configuration of the usage of the simultaneously few parameters @ref fft_sfm_config
   *

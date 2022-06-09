@@ -1,38 +1,29 @@
 #include "thread_rtos_trace.h"
-#include "trace/app_trace.h"
 #include "app_config.h"
+#include "trace/app_trace.h"
 
-
-static uint32_t start_tick;
-static uint32_t dt;
-
-
-void thread_rtos_trace_init(void)
+enum
 {
+    FLAG_PRINTOUT = 0x01,
+};
+
+
+static osThreadId_t * p_thread_id;
+
+void thread_rtos_trace_init(osThreadId_t * p_cur_thread_id)
+{
+    p_thread_id = p_cur_thread_id;
     app_trace_init();
-    start_tick = 0;
 }
 
+void thread_rtos_trace_printout(void) { osThreadFlagsSet(*p_thread_id, FLAG_PRINTOUT); }
 
-void thread_rtos_trace_run(osThreadId_t * p_thread_ids, uint32_t tick_cur)
-{    
-    /// Calculate dt.
-    if (tick_cur > start_tick)
+void thread_rtos_trace_run(osThreadId_t * p_thread_ids)
+{
+    uint32_t flags = osThreadFlagsWait(FLAG_PRINTOUT, osFlagsWaitAny, osWaitForever);
+    if (flags == FLAG_PRINTOUT)
     {
-        dt = tick_cur - start_tick;
+        app_trace_print_timestat();
+        app_trace_print_stackheap_usage((void *)p_thread_ids, THREADS_CNT);
     }
-    else
-    {
-        dt = tick_cur + (UINT32_MAX -start_tick) + 1;
-    }
-
-    /// Check if required_delay not expired.
-    if (dt < APP_RTOS_TRACE_PRINTOUT_PERIOD_MS)
-    {
-        return;
-    }
-
-    app_trace_print_timestat();
-    app_trace_print_stackheap_usage((void *)p_thread_ids, THREADS_CNT);
-    start_tick = tick_cur;
 }

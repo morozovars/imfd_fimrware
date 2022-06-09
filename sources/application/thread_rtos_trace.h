@@ -6,8 +6,9 @@
 #include "util/err_codes.h"
 
 
-void thread_rtos_trace_init(void);
-void thread_rtos_trace_run(osThreadId_t * p_thread_ids, uint32_t tick_cur);
+void thread_rtos_trace_init(osThreadId_t * p_cur_thread_id);
+void thread_rtos_trace_printout(void);
+void thread_rtos_trace_run(osThreadId_t * p_thread_ids);
 
 
 #endif // THREAD_RTOS_THEAD_H_

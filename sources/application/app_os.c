@@ -84,14 +84,9 @@ static void communication_thread(void * argument)
 
 static void rtos_trace_thread(void * argument)
 {
-    static uint32_t tick;
-    tick = osKernelGetTickCount();
     while (1)
     {
-        tick += APP_THREAD_RTOS_TRACE_PERIOD_MS;
-        osDelayUntil(tick);
-
-        thread_rtos_trace_run(thread_ids, tick);
+        thread_rtos_trace_run(thread_ids);
         if (err_check())
         {
             break;
@@ -162,7 +157,7 @@ void app_os_init(void)
     semaphores_init();
     threads_init();
 
-    thread_rtos_trace_init();
+    thread_rtos_trace_init(&thread_ids[THREAD_RTOS_TRACE]);
     thread_blinky_init();
 
     thread_communication_init_t thread_comm_init = 

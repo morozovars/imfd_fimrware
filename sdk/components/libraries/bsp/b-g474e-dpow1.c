@@ -98,7 +98,7 @@ void bsp_init(void)
     .frequency = GPIO_FREQ_LOW,
     .pull = GPIO_PULL_UP,
     .type = GPIO_IN_IT_FALLING,
-    .prio = 0x03};
+    .prio = 10};
   for (uint8_t i = 0; i < JOY_CNT; i++)
   {
     gpio_pin_cfg_input(joy_pins[i], &pin_in_cfg);

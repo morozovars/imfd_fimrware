@@ -2,6 +2,7 @@
 #include "bsp/b-g474e-dpow1.h"
 #include "cmsis_os.h"
 #include "trace/dbgout.h"
+#include "thread_rtos_trace.h"
 
 
 static void bsp_joy_cb(bsp_joy_t joy, GPIO_PinState joy_state)
@@ -10,6 +11,7 @@ static void bsp_joy_cb(bsp_joy_t joy, GPIO_PinState joy_state)
   {
     case JOY_SEL:    
       dbg_printf("JOY: sel pressed!\n");
+      thread_rtos_trace_printout();
       break;
     case JOY_UP:
       dbg_printf("JOY: up pressed!\n");
