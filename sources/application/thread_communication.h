@@ -45,7 +45,8 @@ typedef enum
 
 typedef struct
 {
-    osMessageQueueId_t *      p_queue_msg_id;
+    osMessageQueueId_t *      p_queue_tx_msg_id;
+    osMessageQueueId_t *      p_queue_rx_msg_id;
     osThreadId_t  *           p_wakeup_thread_id;
     osThreadId_t  *           p_cur_thread_id;
     uint32_t                  flags;

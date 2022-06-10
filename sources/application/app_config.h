@@ -13,8 +13,9 @@
 /* USBD config. */
 #define APP_USBD_IRQ_PRIO                         (6u)
 #define APP_USBD_RX_BUF_SIZE                      (CDC_DATA_FS_MAX_PACKET_SIZE)
-#define APP_USBD_TX_BUF_SIZE                      (5120u)
+#define APP_USBD_TX_BUF_SIZE                      (3072)
 #define APP_QUEUE_RX_MSG_COUNT                    (420u)
+#define APP_QUEUE_TX_MSG_COUNT                    (3u)
 
 
 /* FLASH addresses with calibrations. */
@@ -31,7 +32,15 @@ typedef struct
 } app_queue_rx_msg_t;
 
 
+typedef struct
+{
+    uint8_t data[APP_USBD_TX_BUF_SIZE];
+    uint16_t length;
+} app_queue_tx_msg_t;
+
+
 #define APP_QUEUE_RX_MSG_SIZE                     (sizeof(app_queue_rx_msg_t))
+#define APP_QUEUE_TX_MSG_SIZE                     (sizeof(app_queue_tx_msg_t))
 
 
 #endif // APP_CONFIG_H_

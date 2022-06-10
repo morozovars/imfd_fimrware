@@ -13,6 +13,7 @@
 static osThreadId_t thread_ids[THREADS_CNT];
 static osMessageQueueId_t queues_ids[QUEUES_COUNT];
 static uint8_t pool_queue_usb_rx[APP_QUEUE_RX_MSG_COUNT * (APP_QUEUE_RX_MSG_SIZE)];
+static uint8_t pool_queue_usb_tx[APP_QUEUE_TX_MSG_COUNT * (APP_QUEUE_TX_MSG_SIZE)];
 static uint8_t cb_queue[QUEUES_COUNT][sizeof(StaticQueue_t)];
 //static osMutexId_t mutexes_ids[MUTEXES_COUNT];
 //static osSemaphoreId_t semaphore_ids[SEMAPHORE_COUNT];
@@ -133,6 +134,12 @@ static void queues_init(void)
     attr.cb_mem = cb_queue[QUEUE_USB_RX];
     attr.cb_size = sizeof(StaticQueue_t);
     queues_ids[QUEUE_USB_RX] = osMessageQueueNew(APP_QUEUE_RX_MSG_COUNT, APP_QUEUE_RX_MSG_SIZE, &attr);
+
+    attr.mq_mem = pool_queue_usb_tx;
+    attr.mq_size = sizeof(pool_queue_usb_tx);
+    attr.cb_mem = cb_queue[QUEUE_USB_TX];
+    attr.cb_size = sizeof(StaticQueue_t);
+    queues_ids[QUEUE_USB_TX] = osMessageQueueNew(APP_QUEUE_TX_MSG_COUNT, APP_QUEUE_TX_MSG_SIZE, &attr);
 }
 
 
@@ -162,7 +169,8 @@ void app_os_init(void)
 
     thread_communication_init_t thread_comm_init = 
     {
-        .p_queue_msg_id = &queues_ids[QUEUE_USB_RX],
+        .p_queue_rx_msg_id = &queues_ids[QUEUE_USB_RX],
+        .p_queue_tx_msg_id = &queues_ids[QUEUE_USB_TX],
         .p_wakeup_thread_id = &thread_ids[THREAD_DSP],
         .p_cur_thread_id = &thread_ids[THREAD_COMMUNICATION],
         .flags = THREAD_DSP_WAKEUP_FLAG,

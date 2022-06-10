@@ -32,11 +32,21 @@ typedef enum
         THREAD_COMMUNICATION_FLAG_USE_CALIB_REF_GMV * 2,
     THREAD_COMMUNICATION_FLAG_STORE_CUR_GMV_AS_CALIB =
         THREAD_COMMUNICATION_FLAG_USE_CUR_GMV_AS_REF_GMV * 2,
+    THREAD_COMMUNICATION_FLAG_TX_DATA_READY = THREAD_COMMUNICATION_FLAG_STORE_CUR_GMV_AS_CALIB * 2,
     THREAD_COMMUNICATION_FLAG_COUNT,
 } flags_t;
 
 
+enum
+{
+    TEMPORARY_TX_BUF_ENQUEUE_IDX = 0u,
+    TEMPORARY_TX_BUF_DEQUEUE_IDX,
+    TEMPORARY_TX_BUF_COUNT,
+};
+
+
 static osMessageQueueId_t * p_queue_usb_rx;
+static osMessageQueueId_t * p_queue_usb_tx;
 static osThreadId_t * p_wakeup_thread_id;
 static uint32_t wakeup_flags;
 static osThreadId_t * p_cur_thread_id;
@@ -44,7 +54,7 @@ static void (*p_stop_stream_cb)(void);
 static bool is_meas_buf = false;
 static uint64_t total_stream_data_size = 0u;
 static osTimerId_t timer_handle;
-static uint8_t ret_msg_buf[APP_USBD_TX_BUF_SIZE];
+static app_queue_tx_msg_t temporary_tx_msg[TEMPORARY_TX_BUF_COUNT];
 
 
 USBD_HandleTypeDef hUsbDeviceFS;
@@ -53,7 +63,7 @@ extern USBD_DescriptorsTypeDef CDC_Desc;
 
 static void timer_cb(void * argument)
 {
-    APP_PRINTF("Stream stopped, total data = %"PRIu64 " bytes", total_stream_data_size);
+    APP_PRINTF("Stream stopped, total data = %" PRIu64 " bytes", total_stream_data_size);
     total_stream_data_size = 0u;
     p_stop_stream_cb();
     (void)argument;
@@ -171,7 +181,9 @@ static uint32_t get_bank(uint32_t Addr)
     {
         /* No Bank swap */
         bank = (Addr < (FLASH_BASE + FLASH_BANK_SIZE)) ? FLASH_BANK_1 : FLASH_BANK_2;
-    } else {
+    }
+    else
+    {
         /* Bank swap */
         bank = (Addr < (FLASH_BASE + FLASH_BANK_SIZE)) ? FLASH_BANK_2 : FLASH_BANK_1;
     }
@@ -195,10 +207,12 @@ static int store_ref_gmv_on_flash(void)
     if (meas_type == IMFD_MEAS_SINGLE_CURRENT)
     {
         addr = APP_FLASH_ADDR_CALIB_REG_GMV_CURRENT;
-    } else if (meas_type == IMFD_MEAS_VIB_RADIAL)
+    }
+    else if (meas_type == IMFD_MEAS_VIB_RADIAL)
     {
         addr = APP_FLASH_ADDR_CALIB_REG_GMV_VIB1;
-    } else if (meas_type == IMFD_MEAS_VIB_AXIAL)
+    }
+    else if (meas_type == IMFD_MEAS_VIB_AXIAL)
     {
         addr = APP_FLASH_ADDR_CALIB_REG_GMV_VIB2;
     }
@@ -233,7 +247,8 @@ static int store_ref_gmv_on_flash(void)
 
 ret_code_t thread_communication_init(thread_communication_init_t * p_init)
 {
-    p_queue_usb_rx = p_init->p_queue_msg_id;
+    p_queue_usb_rx = p_init->p_queue_rx_msg_id;
+    p_queue_usb_tx = p_init->p_queue_tx_msg_id;
     p_wakeup_thread_id = p_init->p_wakeup_thread_id;
     p_cur_thread_id = p_init->p_cur_thread_id;
     wakeup_flags = p_init->flags;
@@ -258,7 +273,8 @@ ret_code_t thread_communication_run(void)
             THREAD_COMMUNICATION_FLAG_SET_MEAS | THREAD_COMMUNICATION_FLAG_USE_DEFAULT_REF_GMV |
             THREAD_COMMUNICATION_FLAG_USE_CALIB_REF_GMV |
             THREAD_COMMUNICATION_FLAG_USE_CUR_GMV_AS_REF_GMV |
-            THREAD_COMMUNICATION_FLAG_STORE_CUR_GMV_AS_CALIB,
+            THREAD_COMMUNICATION_FLAG_STORE_CUR_GMV_AS_CALIB |
+            THREAD_COMMUNICATION_FLAG_TX_DATA_READY,
         osFlagsWaitAny, osWaitForever);
 
     if (flag >= osFlagsErrorISR)
@@ -343,6 +359,36 @@ ret_code_t thread_communication_run(void)
         store_ref_gmv_on_flash();
         APP_PRINTF("Store current reference GMV to FLASH.");
     }
+    if (flag == THREAD_COMMUNICATION_FLAG_TX_DATA_READY)
+    {
+        uint8_t tx_msg_count = osMessageQueueGetCount(*p_queue_usb_tx);
+        uint8_t * p_dequeue_data = (uint8_t *)&temporary_tx_msg[TEMPORARY_TX_BUF_DEQUEUE_IDX].data;
+        uint16_t * p_dequeue_data_size =
+            (uint16_t *)&temporary_tx_msg[TEMPORARY_TX_BUF_DEQUEUE_IDX].length;
+        while (tx_msg_count != 0)
+        {
+            osDelay(250u);
+            ret_code = os_status2code(osMessageQueueGet(
+                *p_queue_usb_tx, &temporary_tx_msg[TEMPORARY_TX_BUF_DEQUEUE_IDX], 0u, 0u));
+            if (ret_code == CODE_RESOURCES)
+            {
+                return CODE_SUCCESS;
+            }
+            else if (ret_code != CODE_SUCCESS)
+            {
+                APP_PRINTF("USBD TX queue error");
+                return ret_code;
+            }
+            int8_t usbd_code = CDC_Transmit_FS(p_dequeue_data, *p_dequeue_data_size);
+            if (usbd_code != USBD_OK)
+            {
+                APP_PRINTF("USBD transfer error");
+                return CODE_BUSY;
+            }
+
+            tx_msg_count--;
+        }
+    }
     return CODE_SUCCESS;
 }
 
@@ -350,22 +396,29 @@ ret_code_t thread_communication_run(void)
 ret_code_t thread_communication_transmit(
     communication_ret_msg_type_t type, uint8_t * p_buf, uint16_t len)
 {
-    int8_t usbd_code;
+    osStatus_t status = osOK;
+    uint8_t * p_tx_enqueue_data = (uint8_t *)&temporary_tx_msg[TEMPORARY_TX_BUF_ENQUEUE_IDX].data;
+    uint16_t * p_tx_enqueue_size =
+        (uint16_t *)&temporary_tx_msg[TEMPORARY_TX_BUF_ENQUEUE_IDX].length;
 
     if ((len + COMMUNICATION_HEADER_TOTAL_SIZE) > APP_USBD_TX_BUF_SIZE)
     {
         return CODE_RESOURCES;
     }
 
-    memset(ret_msg_buf, 0, len + COMMUNICATION_HEADER_TOTAL_SIZE);
+    memset(p_tx_enqueue_data, 0, len + COMMUNICATION_HEADER_TOTAL_SIZE);
 
-    ret_msg_buf[COMMUNICATION_HEADER_TYPE_IDX] = type;
-    memcpy(ret_msg_buf + COMMUNICATION_HEADER_LEN_IDX, &len, sizeof(len));
-    memcpy(ret_msg_buf + COMMUNICATION_HEADER_TOTAL_SIZE, p_buf, len);
-    usbd_code = CDC_Transmit_FS(ret_msg_buf, len + COMMUNICATION_HEADER_TOTAL_SIZE);
-    if (usbd_code != USBD_OK)
+    p_tx_enqueue_data[COMMUNICATION_HEADER_TYPE_IDX] = type;
+    memcpy(p_tx_enqueue_data + COMMUNICATION_HEADER_LEN_IDX, &len, sizeof(len));
+    memcpy(p_tx_enqueue_data + COMMUNICATION_HEADER_TOTAL_SIZE, p_buf, len);
+    *p_tx_enqueue_size = len + COMMUNICATION_HEADER_TOTAL_SIZE;
+    status = osMessageQueuePut(*p_queue_usb_tx, &temporary_tx_msg[TEMPORARY_TX_BUF_ENQUEUE_IDX], 0u, 0u);
+    if (status != osOK)
     {
-        return CODE_BUSY;
+        return os_status2code(status);
     }
+
+    osThreadFlagsSet(*p_cur_thread_id, THREAD_COMMUNICATION_FLAG_TX_DATA_READY);
+
     return CODE_SUCCESS;
 }

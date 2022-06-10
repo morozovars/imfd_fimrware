@@ -38,15 +38,15 @@ static void process_measurements(uint8_t * p_buf, uint32_t length)
         ret_code = fft_sfm_singal_processing(meas);
         if (ret_code == IMFD_DRDY)
         {
-            // TODO: get slopes and transmit;
             //FFT
-            //fft_sfm_get_fft_buf(&p_data, &data_length);
-            //thread_communication_transmit(
-            //    COMMUNICATION_RET_MSG_TYPE_DEBUG_CMPLX_MAG, (uint8_t *)p_data, data_length); // just a part of the spectrum
+            fft_sfm_get_fft_buf(&p_data, &data_length);
+            thread_communication_transmit(
+                COMMUNICATION_RET_MSG_TYPE_DEBUG_CMPLX_MAG, (uint8_t *)p_data, data_length); // just a part of the spectrum
             // GMV
-            //fft_sfm_get_gmv_buf(&p_data);
-            //thread_communication_transmit(
-            //    COMMUNICATION_RET_MSG_TYPE_DEBUG_GMV, (uint8_t *)p_data, GMV_P * sizeof(POINT_PRECISION));
+            fft_sfm_get_gmv_buf(&p_data);
+            thread_communication_transmit(
+                COMMUNICATION_RET_MSG_TYPE_DEBUG_GMV, (uint8_t *)p_data, GMV_P * sizeof(POINT_PRECISION));
+            
             // Slopes.
             fft_sfm_get_result(&p_slopes, &data_length);
             communication_ret_msg_type_t ret = (data_length == sizeof(POINT_PRECISION)) ? COMMUNICATION_RET_MSG_TYPE_SINGLE_SLOPE : COMMUNICATION_RET_MSG_TYPE_DOUBLE_SLOPE;

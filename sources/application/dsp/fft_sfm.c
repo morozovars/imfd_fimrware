@@ -339,7 +339,6 @@ imfd_ret_t fft_sfm_singal_processing(imfd_meas_t meas)
         polyfit(gmv_buf[GMV_INSTANT_IFR1_VIB_IDX], gmv_ref[GMV_REF_1_VIB_IDX], GMV_P, 1, poly_coefs);
         polyfit(gmv_buf[GMV_INSTANT_IFR2_VIB_IDX], gmv_ref[GMV_REF_2_VIB_IDX], GMV_P, 1, &poly_coefs[2]);
     }
-    APP_PRINTF("slope 1 = %.2f, slope 2 = %.2f", poly_coefs[1], poly_coefs[3])
     debug_total_time_window++;
 
     return IMFD_DRDY;
@@ -393,29 +392,8 @@ void fft_sfm_get_result(POINT_PRECISION ** p_slope, uint16_t * p_len)
 
 void fft_sfm_get_fft_buf(POINT_PRECISION ** p_buf, uint16_t * p_len)
 {
-    /// When fft_sfm_signal_processing return IMFD_DRDY, in buffer decimated_measurement Fourier spectrum.
-    switch (meas_type)
-    {
-        case IMFD_MEAS_VIB_RADIAL:
-        case IMFD_MEAS_VIB_AXIAL:
-            *p_buf = (POINT_PRECISION *)p_ifr[IFR_VIB2_IDX];
-            *p_len = (ifr_length[IFR_VIB2_IDX] * sizeof(POINT_PRECISION));
-            break;
-        case IMFD_MEAS_SINGLE_CURRENT:
-            *p_buf = (POINT_PRECISION *)p_ifr[IFR_CURRENT2_IDX];
-            *p_len = (ifr_length[IFR_CURRENT2_IDX] * sizeof(POINT_PRECISION));
-            break;
-#ifdef USE_VECTOR_PARAMETERS
-        case IMFD_MEAS_VIB_DOUBLE:
-            break;
-        case IMFD_MEAS_THREE_PHASES_CURRENTS:
-            break;
-#endif
-        default:
-            break;
-    }
-    //*p_buf = decimated_measurement;
-    //*p_len = (TIME_WINDOW_MEAS_COUNT/2) * sizeof(POINT_PRECISION);
+    *p_buf = decimated_measurement;
+    *p_len = (TIME_WINDOW_MEAS_COUNT/2) * sizeof(POINT_PRECISION);
 }
 
 

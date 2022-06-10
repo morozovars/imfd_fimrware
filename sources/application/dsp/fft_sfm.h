@@ -190,27 +190,6 @@ typedef struct MEAS_STRUCT_ALIGN
 
 
 /**
-  * @brief FFT_SFM: Information Frequency Ranges (IFRs). @ref fft_sfm_config
-  */
-enum
-{
-    IFR2_CUR_FREQ1 = 0u,
-    IFR2_CUR_FREQ2 = 500u,
-    IFR1_CUR_FREQ1 = 0u,
-    IFR1_CUR_FREQ2 = 100u,
-    IFR_CUR_COUNT = 1u,
-
-    IFR1_VIB_FREQ1 = 200u,
-    IFR1_VIB_FREQ2 = 275u,
-    IFR2_VIB_FREQ1 = 0u,
-    IFR2_VIB_FREQ2 = 200u,
-    IFR_VIB_COUNT = 2u,
-
-    IFR_MAX_COUNT = IFR_VIB_COUNT,
-};
-
-
-/**
   * @brief FFT_SFM: Return codes.
   */
 typedef enum
