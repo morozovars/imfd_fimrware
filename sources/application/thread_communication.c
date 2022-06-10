@@ -32,7 +32,9 @@ typedef enum
         THREAD_COMMUNICATION_FLAG_USE_CALIB_REF_GMV * 2,
     THREAD_COMMUNICATION_FLAG_STORE_CUR_GMV_AS_CALIB =
         THREAD_COMMUNICATION_FLAG_USE_CUR_GMV_AS_REF_GMV * 2,
-    THREAD_COMMUNICATION_FLAG_TX_DATA_READY = THREAD_COMMUNICATION_FLAG_STORE_CUR_GMV_AS_CALIB * 2,
+    THREAD_COMMUNICATION_FLAG_CHANGE_IFR_OF_DEBUG =
+        THREAD_COMMUNICATION_FLAG_STORE_CUR_GMV_AS_CALIB * 2,
+    THREAD_COMMUNICATION_FLAG_TX_DATA_READY = THREAD_COMMUNICATION_FLAG_CHANGE_IFR_OF_DEBUG * 2,
     THREAD_COMMUNICATION_FLAG_COUNT,
 } flags_t;
 
@@ -126,6 +128,9 @@ static void cdc_evt_handler(cdc_evt_params_t params)
                         osThreadFlagsSet(
                             *p_cur_thread_id, THREAD_COMMUNICATION_FLAG_STORE_CUR_GMV_AS_CALIB);
                         break;
+                    case COMMUNICATION_MSG_TYPE_CHANGE_IFR_OF_DEBUG:
+                        osThreadFlagsSet(
+                            *p_cur_thread_id, THREAD_COMMUNICATION_FLAG_CHANGE_IFR_OF_DEBUG);
                     default:
                         break;
                 }
@@ -274,7 +279,7 @@ ret_code_t thread_communication_run(void)
             THREAD_COMMUNICATION_FLAG_USE_CALIB_REF_GMV |
             THREAD_COMMUNICATION_FLAG_USE_CUR_GMV_AS_REF_GMV |
             THREAD_COMMUNICATION_FLAG_STORE_CUR_GMV_AS_CALIB |
-            THREAD_COMMUNICATION_FLAG_TX_DATA_READY,
+            THREAD_COMMUNICATION_FLAG_CHANGE_IFR_OF_DEBUG | THREAD_COMMUNICATION_FLAG_TX_DATA_READY,
         osFlagsWaitAny, osWaitForever);
 
     if (flag >= osFlagsErrorISR)
@@ -359,6 +364,23 @@ ret_code_t thread_communication_run(void)
         store_ref_gmv_on_flash();
         APP_PRINTF("Store current reference GMV to FLASH.");
     }
+    if (flag == THREAD_COMMUNICATION_FLAG_CHANGE_IFR_OF_DEBUG)
+    {
+        ret_code = os_status2code(osMessageQueueGet(*p_queue_usb_rx, &msg, NULL, 0u));
+        if (ret_code != CODE_SUCCESS)
+        {
+            APP_PRINTF("Change IFR, queue error = %d", ret_code);
+            return CODE_ERROR;
+        }
+        if (msg.length != sizeof(uint8_t))
+        {
+            APP_PRINTF("Change IFR length error, length = %d", msg.length);
+            return CODE_ERROR;
+        }
+        uint8_t ifr = msg.buf[0];
+        APP_PRINTF("Change IFR of debug = %d", ifr);
+        fft_sfm_change_ifr_of_debug(ifr);
+    }
     if (flag == THREAD_COMMUNICATION_FLAG_TX_DATA_READY)
     {
         uint8_t tx_msg_count = osMessageQueueGetCount(*p_queue_usb_tx);
@@ -412,7 +434,8 @@ ret_code_t thread_communication_transmit(
     memcpy(p_tx_enqueue_data + COMMUNICATION_HEADER_LEN_IDX, &len, sizeof(len));
     memcpy(p_tx_enqueue_data + COMMUNICATION_HEADER_TOTAL_SIZE, p_buf, len);
     *p_tx_enqueue_size = len + COMMUNICATION_HEADER_TOTAL_SIZE;
-    status = osMessageQueuePut(*p_queue_usb_tx, &temporary_tx_msg[TEMPORARY_TX_BUF_ENQUEUE_IDX], 0u, 0u);
+    status =
+        osMessageQueuePut(*p_queue_usb_tx, &temporary_tx_msg[TEMPORARY_TX_BUF_ENQUEUE_IDX], 0u, 0u);
     if (status != osOK)
     {
         return os_status2code(status);

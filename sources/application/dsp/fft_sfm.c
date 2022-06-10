@@ -129,6 +129,7 @@ static calib_ref_gmv_addr_t addr_calib_ref_gmv;
 static imfd_gmv_ref_source_t gmv_ref_source = IMFD_REF_GMV_LOAD_DEFAULT;
 static POINT_PRECISION moment_order[GMV_P];
 static uint32_t debug_total_time_window = 0;
+static uint8_t cur_debug_ifr = 1;
 
 
 static imfd_ret_t decimation(imfd_meas_t meas)
@@ -462,10 +463,19 @@ void fft_sfm_set_ref_gmv(imfd_gmv_ref_source_t source)
 
 void fft_sfm_get_ref_gmv(POINT_PRECISION ** p_ref_gmv, uint32_t * p_len)
 {
-    *p_ref_gmv = gmv_ref[0];
+    *p_ref_gmv = gmv_ref[cur_debug_ifr];
     *p_len = sizeof(gmv_ref);
 }
 
+
+void fft_sfm_change_ifr_of_debug(uint8_t ifr)
+{
+    if ((ifr == 0) || (ifr > (IFR_TOTAL_COUNT+1)))
+    {
+        return;
+    }
+    cur_debug_ifr = ifr-1;
+}
 
 void fft_sfm_reset(void)
 {

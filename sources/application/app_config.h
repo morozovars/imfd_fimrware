@@ -15,7 +15,7 @@
 #define APP_USBD_RX_BUF_SIZE                      (CDC_DATA_FS_MAX_PACKET_SIZE)
 #define APP_USBD_TX_BUF_SIZE                      (3072)
 #define APP_QUEUE_RX_MSG_COUNT                    (420u)
-#define APP_QUEUE_TX_MSG_COUNT                    (3u)
+#define APP_QUEUE_TX_MSG_COUNT                    (4u)
 
 
 /* FLASH addresses with calibrations. */

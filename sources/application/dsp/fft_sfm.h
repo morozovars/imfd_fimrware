@@ -314,6 +314,8 @@ void fft_sfm_get_fft_buf(POINT_PRECISION ** p_buf, uint16_t * p_len);
 void fft_sfm_get_gmv_buf(POINT_PRECISION ** p_buf);
 
 
+void fft_sfm_change_ifr_of_debug(uint8_t ifr);
+
 /**
   * @brief:   Reset buffer indexes.
   */
