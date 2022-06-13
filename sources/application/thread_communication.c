@@ -331,8 +331,8 @@ ret_code_t thread_communication_run(void)
                 APP_PRINTF("Set meas, new type - Current");
                 fft_sfm_set_meas_type(IMFD_MEAS_SINGLE_CURRENT);
                 break;
-            case COMMUNICATION_MEAS_TYPE_VIB_VERTICAL:
-                APP_PRINTF("Set meas, new type - Vibration Vertical");
+            case COMMUNICATION_MEAS_TYPE_VIB_RADIAL:
+                APP_PRINTF("Set meas, new type - Vibration Radial");
                 fft_sfm_set_meas_type(IMFD_MEAS_VIB_RADIAL);
                 break;
             case COMMUNICATION_MEAS_TYPE_VIB_AXIAL:
