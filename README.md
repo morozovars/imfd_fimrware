@@ -16,6 +16,7 @@
   - [How to debug?](#how-to-debug)
   - [Repo structure](#repo-structure)
     - [Main (and one) application project structure](#main-and-one-application-project-structure)
+  - [Communication via USB](#communication-via-usb)
 
 ## What is it?
 
@@ -123,3 +124,7 @@ Algorithm descibed in a few papers on Russian and English languages, which locat
     - **application_ses** - Executable main application project. This application dependend on a few (following next) static libraries.
     - **stm32g4xx_cmsis_hal_ses** - Static library with HAL and CMSIS provied by ST Microelectronics for STM32G4 series. This library used files in [sdk/MCU/STM32/STM32CubeG4](https://github.com/STMicroelectronics/STM32CubeG4) submodule.
     - **stm32g4xx_freertos_ses** - Static library with FreeRTOS port on STM32G4 provied by ST Microelectronics for STM32G4 series. This library used files in [sdk/MCU/STM32/STM32CubeG4](https://github.com/STMicroelectronics/STM32CubeG4) submodule.
+
+## Communication via USB
+
+Device communicating thorugh developed, so-called ONECOM protocol, described in *[docs/ONECOM_v.1.0.0.pdf](docs/ONECOM_v.1.0.0.pdf)*.
