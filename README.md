@@ -1,11 +1,28 @@
 # Induction Motors Fault Detection Firmware Prototype
 
+## Table of content
+
+- [Induction Motors Fault Detection Firmware Prototype](#induction-motors-fault-detection-firmware-prototype)
+  - [Table of content](#table-of-content)
+  - [What is it?](#what-is-it)
+    - [Prehistory](#prehistory)
+    - [Online experiment](#online-experiment)
+    - [Real-time monitoring device prototype](#real-time-monitoring-device-prototype)
+  - [Getting started](#getting-started)
+    - [Prerequirements to start](#prerequirements-to-start)
+    - [How to start](#how-to-start)
+  - [Firmware arcitecture](#firmware-arcitecture)
+  - [Algorithm description](#algorithm-description)
+  - [How to debug?](#how-to-debug)
+  - [Repo structure](#repo-structure)
+    - [Main (and one) application project structure](#main-and-one-application-project-structure)
+
 ## What is it?
 
 ### Prehistory
 
-Development of the Real-Time Monitoring System of the Induction Motor Technical Condition is the goal of the PhD research of the repo's founder Morozov Arsenii. In frame of research the prototype of the device for real-time monitoring was developed.
-The main goal of the PhD research is development of the new signal processing technique to treat vibration and current signals from induction motor to extract diagnostic information and make decision about fault condition of the tested motor. FFT+SFM method based on Fast Fourier Transform (FFT) and Statistics of the Fractional Moments (SFM) have been proposed. To test FFT+SFM method it was implemented in motor's condition monitoring device. The only one option to test device was so-called "online-experiment". The essence and meaning of the online-experiment described in [separate subsection](#online-experiment). The device was developed in order to test proposed method with respect to online-experiment requirements and specific.
+Development of the Real-Time Monitoring System of the Induction Motor Technical Condition was in frame of the PhD research of the repo's founder Morozov Arsenii.
+The main goal of the PhD research is development of the new signal processing technique to treat vibration or/and (depends on avialability) current signals from induction motor to extract diagnostic information and make decision about fault condition of the tested motor. FFT+SFM method based on Fast Fourier Transform (FFT) and Statistics of the Fractional Moments (SFM) have been developed and proposed. To test FFT+SFM method it was implemented in prototype of the motor's condition monitoring device. The only one option to test device was so-called "online-experiment". The essence and meaning of the online-experiment described in [separate subsection](#online-experiment). The device was developed in order to test proposed method with respect to online-experiment requirements and specific.
 
 ### Online experiment
 
@@ -17,21 +34,21 @@ The setup for online-experiment includes:
 3. A personal computer with software No. 2 is designed to receive data over the Internet, display, saving and transmitting data to the device in real time
 4. A prototype of a monitoring device that implements the proposed signal processing technique for diagnosing the technical condition of the AD.
 
-Device prototype interacts with software No.2 which located in special [repo](https://github.com/morozovars/data_stream_labview).
+Device prototype interacts with software No.2 which located in special [data_stream_labview repo](https://github.com/morozovars/data_stream_labview).
 
 ### Real-time monitoring device prototype
 
 The hardware platform of prototype is [B-G474E-DPOW1 (STM32G474 Discovery)](https://www.st.com/en/evaluation-tools/b-g474e-dpow1.html).
 Software of the prototype (firmware) implements proposed FFT+SFM signal processing method and communication over USB with PC.
 This repo contains project files, source codes, tools and documentation of the firmware for development of the Induction Motors Fault Detection Monitoring device prototype.
-    Current version of the device not interacts with sensors directly, it received via USB.
+    Current version of the device not interacts with sensors directly, it received sensors data via USB.
 
 ## Getting started
 
 ### Prerequirements to start
 
-1. You need [B-G474E-DPOW1 (STM32G474 Discovery)](https://www.st.com/en/evaluation-tools/b-g474e-dpow1.html) board.
-2. PC with Windows/Linux/Mac (last test was on Windows 10, so not guarantee work "out of box" on other machines).
+1. You need [B-G474E-DPOW1 (STM32G474 Discovery)](https://www.st.com/en/evaluation-tools/b-g474e-dpow1.html) board. Can be evauluated on other boards with STM32G474RE MCU, but some features may not work as described.
+2. PC with Windows/Linux/Mac (last test was on Windows 10, so not guarantee work "out of box" on machines with different operating systems).
 
 ### How to start
 
@@ -56,7 +73,7 @@ Also you should observe that LD2,3,4,5 consequently blinking.
 
 ## Firmware arcitecture
 
-Firmware arcitecture described in *[this document](docs/IMFD_FW.xlsx)*
+Firmware arcitecture described in *[docs/IMFD_FW.xlsx](docs/IMFD_FW.xlsx)*
 
 ## Algorithm description
 
@@ -64,9 +81,8 @@ Algorithm descibed in a few papers on Russian and English languages, which locat
 
 ## How to debug?
 
-1. Debug system. System supports general debugging with all features supported by IDE: breakpoints, terminal (by printf), watch, callstack, etc.
-By pressing on In addition [SEGGER SystemView](https://www.segger.com/products/development-tools/systemview/) can be used to discover RTOS operating.
-2. Debug algorithm. System also sends some additional debug data obtains on following algorithm states: FFT computation, GMV computation. Sending of these data arrays controlled in *[sources/application/thread_dsp.c](sources/application/thread_dsp.c)* in *process_measurements()* function. Also system support
+1. Debug system. System supports general debugging with all features supported by IDE: breakpoints, terminal (by printf), watch, callstack, etc. In addition [SEGGER SystemView](https://www.segger.com/products/development-tools/systemview/) can be used to discover RTOS operating.
+1. Debug algorithm. System also sends some additional debug data, which obtains on following algorithm states: FFT computation, GMV computation. Sending of these data arrays controlled in *[sources/application/thread_dsp.c](sources/application/thread_dsp.c)* in *process_measurements()* function. Also system support command "CHANGE IFR OF DEBUG GMV" which allow to set another IFR (Information Frequency Range) of the algorithm.
 
 ## Repo structure
 
@@ -82,7 +98,7 @@ By pressing on In addition [SEGGER SystemView](https://www.segger.com/products/d
  ├─bootloader
 ```
 
-- **docs** - documentation: datasheets, app notes, project's documentation. In *docs/FFT_SFM/** you can find papers described FFT+SFM signal processing technique.
+- **docs** - documentation: datasheets, app notes, project's documentation
 - **projects** - IDE's projects
   - **application** - IDE's projects for application
   - **samples** - samples and examples
@@ -104,6 +120,6 @@ By pressing on In addition [SEGGER SystemView](https://www.segger.com/products/d
 
 - **projects** - IDE's projects
   - **application** - IDE's projects for application
-    - **application_ses** - Executable main application project. This application dependend on a few static libraries.
+    - **application_ses** - Executable main application project. This application dependend on a few (following next) static libraries.
     - **stm32g4xx_cmsis_hal_ses** - Static library with HAL and CMSIS provied by ST Microelectronics for STM32G4 series. This library used files in [sdk/MCU/STM32/STM32CubeG4](https://github.com/STMicroelectronics/STM32CubeG4) submodule.
     - **stm32g4xx_freertos_ses** - Static library with FreeRTOS port on STM32G4 provied by ST Microelectronics for STM32G4 series. This library used files in [sdk/MCU/STM32/STM32CubeG4](https://github.com/STMicroelectronics/STM32CubeG4) submodule.
