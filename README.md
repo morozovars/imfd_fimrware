@@ -72,6 +72,8 @@ This repo contains project files, source codes, tools and documentation of the f
 
 Also you should observe that LD2,3,4,5 consequently blinking.
 
+8. Prototype of the device communicate with [Software N.2](https://github.com/morozovars/data_stream_labview), so you can use this software to operate with device.
+
 ## Firmware arcitecture
 
 Firmware arcitecture described in *[docs/IMFD_FW.xlsx](docs/IMFD_FW.xlsx)*
