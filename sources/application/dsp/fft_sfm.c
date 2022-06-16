@@ -94,7 +94,7 @@ typedef struct
 } calib_ref_gmv_addr_t;
 
 
-static uint32_t sample_freq = 1E5;
+static uint32_t sample_freq = 1E3;
 static POINT_PRECISION decimated_measurement[TIME_WINDOW_MEAS_COUNT];
 static POINT_PRECISION cmplx_fft_result[TIME_WINDOW_MEAS_COUNT];
 static uint32_t cur_decimation_count = 0;
@@ -119,7 +119,7 @@ static POINT_PRECISION gmv_ref[GMV_REF_TOTAL_COUNT][GMV_P];
 static const POINT_PRECISION default_gmv_ref[DEFAULT_REF_GMV_TOTAL_COUNT][GMV_P] = {
     [DEFAULT_REF_GMV_CURRENT1_IDX] = DEFAULT_GMV1_CURRENT,
     [DEFAULT_REF_GMV_CURRENT2_IDX] = DEFAULT_GMV2_CURRENT,
-    [DEFAULT_REF_GMV1_VIB1_IDX] = DEFAULT_GMV2_VIB_RADIAL,
+    [DEFAULT_REF_GMV1_VIB1_IDX] = DEFAULT_GMV1_VIB_RADIAL,
     [DEFAULT_REF_GMV2_VIB1_IDX] = DEFAULT_GMV2_VIB_RADIAL,
     [DEFAULT_REF_GMV1_VIB2_IDX] = DEFAULT_GMV1_VIB_AXIAL,
     [DEFAULT_REF_GMV2_VIB2_IDX] = DEFAULT_GMV2_VIB_AXIAL,
@@ -400,7 +400,7 @@ void fft_sfm_get_fft_buf(POINT_PRECISION ** p_buf, uint16_t * p_len)
 
 void fft_sfm_get_gmv_buf(POINT_PRECISION ** p_buf)
 {
-    *p_buf = gmv_buf[GMV_IFR2_IDX];
+    *p_buf = gmv_buf[cur_debug_ifr];
 }
 
 
@@ -463,7 +463,7 @@ void fft_sfm_set_ref_gmv(imfd_gmv_ref_source_t source)
 
 void fft_sfm_get_ref_gmv(POINT_PRECISION ** p_ref_gmv, uint32_t * p_len)
 {
-    *p_ref_gmv = gmv_ref[cur_debug_ifr];
+    *p_ref_gmv = gmv_ref[0];
     *p_len = sizeof(gmv_ref);
 }
 
